@@ -9,7 +9,7 @@
   Usage:
   {% render 'pdp-essentials', block: block, product: product, localization: localization %}
 {% endcomment %}
-<div data-component="pdp-essentials" {{ block.shopify_attributes }}>
+<div data-component="pdp-essentials" {{ block.shopify_attributes }} data-link-behavior="{{ block.settings.link_behavior | default: 'modal' }}">
   {% liquid
     assign layout = block.settings.layout_style | default: 'bar'
     assign compact = block.settings.compact_mode
@@ -21,24 +21,25 @@
   {%- assign returns_title = block.settings.returns_text | default: ('sections.pdp_essentials.returns' | t) -%}
   {%- assign returns_details = block.settings.returns_details | default: ('sections.pdp_essentials.returns_details' | t) -%}
 
+  {%- if delivery_details != blank -%}
+    <div id="pdp-delivery-details" hidden>{{ delivery_details }}</div>
+  {%- endif -%}
+  {%- if returns_details != blank -%}
+    <div id="pdp-returns-details" hidden>{{ returns_details }}</div>
+  {%- endif -%}
+
   {% case layout %}
     {% when 'cards' %}
       <ul style="display:flex;flex-wrap:wrap;list-style:none;margin:0;padding:0;gap:{% if compact %}4px{% else %}8px{% endif %};">
         {%- if delivery_title != blank or delivery_details != blank -%}
           <li style="{% if dividers %}border:1px solid currentColor;{% endif %}border-radius:9999px;padding:{% if compact %}2px 8px{% else %}4px 12px{% endif %};">
-            <span>{{ delivery_title }}</span>
-            {%- if delivery_details != blank -%}
-              <div>{{ delivery_details }}</div>
-            {%- endif -%}
+            <button type="button" data-essentials-trigger aria-controls="pdp-delivery-details" style="all:unset;cursor:pointer;">{{ delivery_title }}</button>
           </li>
         {%- endif -%}
 
         {%- if returns_title != blank or returns_details != blank -%}
           <li style="{% if dividers %}border:1px solid currentColor;{% endif %}border-radius:9999px;padding:{% if compact %}2px 8px{% else %}4px 12px{% endif %};">
-            <span>{{ returns_title }}</span>
-            {%- if returns_details != blank -%}
-              <div>{{ returns_details }}</div>
-            {%- endif -%}
+            <button type="button" data-essentials-trigger aria-controls="pdp-returns-details" style="all:unset;cursor:pointer;">{{ returns_title }}</button>
           </li>
         {%- endif -%}
 
@@ -52,27 +53,21 @@
     {% when 'accordion' %}
       <div style="margin:0;padding:0;">
         {%- if delivery_title != blank or delivery_details != blank -%}
-          <details style="padding:{% if compact %}4px 0{% else %}8px 0{% endif %};{% if dividers %}border-bottom:1px solid currentColor;{% endif %}">
-            <summary>{{ delivery_title }}</summary>
-            {%- if delivery_details != blank -%}
-              <div>{{ delivery_details }}</div>
-            {%- endif -%}
-          </details>
+          <div style="padding:{% if compact %}4px 0{% else %}8px 0{% endif %};{% if dividers %}border-bottom:1px solid currentColor;{% endif %}">
+            <button type="button" data-essentials-trigger aria-controls="pdp-delivery-details" style="all:unset;cursor:pointer;">{{ delivery_title }}</button>
+          </div>
         {%- endif -%}
 
         {%- if returns_title != blank or returns_details != blank -%}
-          <details style="padding:{% if compact %}4px 0{% else %}8px 0{% endif %};{% if dividers %}border-bottom:1px solid currentColor;{% endif %}">
-            <summary>{{ returns_title }}</summary>
-            {%- if returns_details != blank -%}
-              <div>{{ returns_details }}</div>
-            {%- endif -%}
-          </details>
+          <div style="padding:{% if compact %}4px 0{% else %}8px 0{% endif %};{% if dividers %}border-bottom:1px solid currentColor;{% endif %}">
+            <button type="button" data-essentials-trigger aria-controls="pdp-returns-details" style="all:unset;cursor:pointer;">{{ returns_title }}</button>
+          </div>
         {%- endif -%}
 
         {%- if block.settings.show_size_link and block.settings.size_guide_page != blank -%}
-          <details style="padding:{% if compact %}4px 0{% else %}8px 0{% endif %};{% if dividers %}border-bottom:1px solid currentColor;{% endif %}">
-            <summary><a href="{{ block.settings.size_guide_page.url }}">{{ 'sections.pdp_essentials.size_and_fit' | t }}</a></summary>
-          </details>
+          <div style="padding:{% if compact %}4px 0{% else %}8px 0{% endif %};{% if dividers %}border-bottom:1px solid currentColor;{% endif %}">
+            <a href="{{ block.settings.size_guide_page.url }}">{{ 'sections.pdp_essentials.size_and_fit' | t }}</a>
+          </div>
         {%- endif -%}
       </div>
 
@@ -80,19 +75,13 @@
       <ul style="display:flex;flex-wrap:wrap;list-style:none;margin:0;padding:0;gap:{% if compact %}4px{% else %}8px{% endif %};{% if dividers %}border-top:1px solid currentColor;border-bottom:1px solid currentColor;{% endif %}">
         {%- if delivery_title != blank or delivery_details != blank -%}
           <li style="padding:{% if compact %}4px 8px{% else %}8px 12px{% endif %};{% if dividers %}border-right:1px solid currentColor;{% endif %}">
-            <span>{{ delivery_title }}</span>
-            {%- if delivery_details != blank -%}
-              <div>{{ delivery_details }}</div>
-            {%- endif -%}
+            <button type="button" data-essentials-trigger aria-controls="pdp-delivery-details" style="all:unset;cursor:pointer;">{{ delivery_title }}</button>
           </li>
         {%- endif -%}
 
         {%- if returns_title != blank or returns_details != blank -%}
           <li style="padding:{% if compact %}4px 8px{% else %}8px 12px{% endif %};{% if dividers %}border-right:1px solid currentColor;{% endif %}">
-            <span>{{ returns_title }}</span>
-            {%- if returns_details != blank -%}
-              <div>{{ returns_details }}</div>
-            {%- endif -%}
+            <button type="button" data-essentials-trigger aria-controls="pdp-returns-details" style="all:unset;cursor:pointer;">{{ returns_title }}</button>
           </li>
         {%- endif -%}
 
@@ -108,4 +97,21 @@
   {%- if trust_line_text != blank -%}
     <p class="pdp-essentials__trust-line">{{ trust_line_text }}</p>
   {%- endif -%}
+
+  <script>
+    (function(){
+      var container=document.currentScript.parentElement;
+      var triggers=container.querySelectorAll('[data-essentials-trigger]');
+      var mobile=matchMedia('(hover: none)').matches;
+      var supportsModal=typeof HTMLDialogElement==='function';
+      var linkBehavior=container.dataset.linkBehavior;
+      var modal,focusEls,first,last;
+      function trap(e){if(e.key==='Tab'){if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}}
+      function openModal(content){if(!modal){modal=document.createElement('dialog');modal.dataset.event='pdp_essentials_modal';modal.innerHTML='<button data-close>×</button><div></div>';modal.querySelector('[data-close]').onclick=closeModal;document.body.appendChild(modal);}modal.querySelector('div').innerHTML=content;modal.showModal();focusEls=[...modal.querySelectorAll('a,button,input,select,textarea,[tabindex]:not([tabindex="-1"])')];first=focusEls[0];last=focusEls[focusEls.length-1];modal.addEventListener('keydown',trap);}
+      function closeModal(){if(modal){modal.close();modal.removeEventListener('keydown',trap);}}
+      function openNewTab(content){var w=window.open('','_blank');w.document.write(content);}
+      triggers.forEach(function(t){var id=t.getAttribute('aria-controls');var html=document.getElementById(id)?.innerHTML||'';if(mobile){t.addEventListener('click',function(e){e.preventDefault();if(linkBehavior==='modal'&&supportsModal){openModal(html);}else{openNewTab(html);}});}else{var tip;function show(){tip=tip||document.createElement('div');tip.className='pdp-essentials__tooltip';tip.innerHTML=html;document.body.appendChild(tip);var r=t.getBoundingClientRect();tip.style.position='absolute';tip.style.top=(r.bottom+window.scrollY)+'px';tip.style.left=(r.left+window.scrollX)+'px';tip.hidden=false;}function hide(){if(tip)tip.hidden=true;}t.addEventListener('mouseenter',show);t.addEventListener('focus',show);t.addEventListener('mouseleave',hide);t.addEventListener('blur',hide);}});
+      document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
+    })();
+  </script>
 </div>
