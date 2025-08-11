@@ -3454,3 +3454,67 @@ details-disclosure > details {
     --border-offset: 0px; /* Prevent the border from growing on buttons when this effect is on. */
   }
 }
+/* ----- Hero overlap header styles ------------------------------------ */
+#SiteHeaderWrapper {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: none;
+  border: none;
+}
+
+#SiteHeader {
+  position: relative;
+  z-index: 1;
+}
+
+/* Transparency over hero */
+#SiteHeaderWrapper.is-transparent {
+  background: transparent;
+}
+#SiteHeaderWrapper.is-transparent #SiteHeader::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.15), rgba(0,0,0,0));
+}
+#SiteHeaderWrapper.is-transparent,
+#SiteHeaderWrapper.is-transparent a,
+#SiteHeaderWrapper.is-transparent summary,
+#SiteHeaderWrapper.is-transparent .header__icon {
+  color: #fff;
+  text-decoration-color: currentColor;
+}
+#SiteHeaderWrapper.is-transparent summary::after {
+  border-top-color: currentColor;
+}
+
+/* Solid glassy state */
+#SiteHeaderWrapper.is-solid {
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: saturate(180%) blur(20px);
+  box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+}
+#SiteHeaderWrapper.is-solid,
+#SiteHeaderWrapper.is-solid a,
+#SiteHeaderWrapper.is-solid summary,
+#SiteHeaderWrapper.is-solid .header__icon {
+  color: #000;
+  text-decoration-color: currentColor;
+}
+#SiteHeaderWrapper.is-solid summary::after {
+  border-top-color: currentColor;
+}
+
+/* Logo visibility */
+.logo--white { display: none; }
+#SiteHeaderWrapper.is-transparent .logo--white { display: block; }
+#SiteHeaderWrapper.is-transparent .logo--black { display: none; }
+#SiteHeaderWrapper.is-solid .logo--white { display: none; }
+#SiteHeaderWrapper.is-solid .logo--black { display: block; }
+
+/* Pull hero up under transparent header */
+.header-overlap .section-header + .shopify-section {
+  margin-top: calc(-1 * var(--header-height));
+}
