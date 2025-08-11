@@ -460,6 +460,12 @@
                   section_id: section.id,
                   show_pickup_availability: true
                 -%}
+              {%- when 'pdp_essentials' -%}
+                {%- render 'pdp-essentials',
+                  block: block,
+                  product: product,
+                  localization: localization
+                -%}
               {%- when 'rating' -%}
                 {%- if product.metafields.reviews.rating.value != blank -%}
                   <div class="rating-wrapper">
