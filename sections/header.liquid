@@ -134,7 +134,7 @@
   endfor
 -%}
 
-<{% if section.settings.sticky_header_type != 'none' %}sticky-header data-sticky-type="{{ section.settings.sticky_header_type }}"{% else %}div{% endif %} class="header-wrapper color-{{ section.settings.color_scheme }} gradient{% if section.settings.show_line_separator %} header-wrapper--border-bottom{% endif %}">
+<sticky-header id="SiteHeaderWrapper" data-sticky-type="always" class="header-wrapper color-{{ section.settings.color_scheme }} is-transparent">
   {%- liquid
     assign social_links = false
     assign localization_forms = false
@@ -147,7 +147,7 @@
       assign localization_forms = true
     endif
   -%}
-  <header class="header header--{{ section.settings.logo_position }} header--mobile-{{ section.settings.mobile_logo_position }} page-width{% if section.settings.menu_type_desktop == 'drawer' %} drawer-menu{% endif %}{% if section.settings.menu != blank %} header--has-menu{% endif %}{% if has_app_block %} header--has-app{% endif %}{% if social_links %} header--has-social{% endif %}{% if shop.customer_accounts_enabled %} header--has-account{% endif %}{% if localization_forms %} header--has-localizations{% endif %}">
+  <header id="SiteHeader" class="header header--{{ section.settings.logo_position }} header--mobile-{{ section.settings.mobile_logo_position }} page-width{% if section.settings.menu_type_desktop == 'drawer' %} drawer-menu{% endif %}{% if section.settings.menu != blank %} header--has-menu{% endif %}{% if has_app_block %} header--has-app{% endif %}{% if social_links %} header--has-social{% endif %}{% if shop.customer_accounts_enabled %} header--has-account{% endif %}{% if localization_forms %} header--has-localizations{% endif %}">
     {%- liquid
       if section.settings.menu != blank
         render 'header-drawer'
@@ -165,19 +165,10 @@
           <a href="{{ routes.root_url }}" class="header__heading-link link link--text focus-inset">
             {%- if settings.logo != blank -%}
               <div class="header__heading-logo-wrapper">
-                {%- assign logo_alt = settings.logo.alt | default: shop.name | escape -%}
-                {%- assign logo_height = settings.logo_width | divided_by: settings.logo.aspect_ratio -%}
-                {% capture sizes %}(max-width: {{ settings.logo_width | times: 2 }}px) 50vw, {{ settings.logo_width }}px{% endcapture %}
-                {% capture widths %}{{ settings.logo_width }}, {{ settings.logo_width | times: 1.5 | round }}, {{ settings.logo_width | times: 2 }}{% endcapture %}
-                {{ settings.logo | image_url: width: 600 | image_tag:
-                  class: 'header__heading-logo motion-reduce',
-                  widths: widths,
-                  height: logo_height,
-                  width: settings.logo_width,
-                  alt: logo_alt,
-                  sizes: sizes,
-                  preload: true
-                }}
+                {%- assign logo_alt = shop.name | escape -%}
+                {% capture logo_widths %}{{ settings.logo_width }}, {{ settings.logo_width | times: 2 }}{% endcapture %}
+                {{ 'logo-white.png' | asset_url | image_tag: class: 'header__heading-logo logo--white', widths: logo_widths, width: settings.logo_width, alt: logo_alt }}
+                {{ 'logo-black.png' | asset_url | image_tag: class: 'header__heading-logo logo--black', widths: logo_widths, width: settings.logo_width, alt: logo_alt }}
               </div>
             {%- else -%}
               <span class="h2">{{ shop.name }}</span>
@@ -205,19 +196,10 @@
           <a href="{{ routes.root_url }}" class="header__heading-link link link--text focus-inset">
             {%- if settings.logo != blank -%}
               <div class="header__heading-logo-wrapper">
-                {%- assign logo_alt = settings.logo.alt | default: shop.name | escape -%}
-                {%- assign logo_height = settings.logo_width | divided_by: settings.logo.aspect_ratio -%}
-                {% capture sizes %}(min-width: 750px) {{ settings.logo_width }}px, 50vw{% endcapture %}
-                {% capture widths %}{{ settings.logo_width }}, {{ settings.logo_width | times: 1.5 | round }}, {{ settings.logo_width | times: 2 }}{% endcapture %}
-                {{ settings.logo | image_url: width: 600 | image_tag:
-                  class: 'header__heading-logo',
-                  widths: widths,
-                  height: logo_height,
-                  width: settings.logo_width,
-                  alt: logo_alt,
-                  sizes: sizes,
-                  preload: true
-                }}
+                {%- assign logo_alt = shop.name | escape -%}
+                {% capture logo_widths %}{{ settings.logo_width }}, {{ settings.logo_width | times: 2 }}{% endcapture %}
+                {{ 'logo-white.png' | asset_url | image_tag: class: 'header__heading-logo logo--white', widths: logo_widths, width: settings.logo_width, alt: logo_alt }}
+                {{ 'logo-black.png' | asset_url | image_tag: class: 'header__heading-logo logo--black', widths: logo_widths, width: settings.logo_width, alt: logo_alt }}
               </div>
             {%- else -%}
               <span class="h2">{{ shop.name }}</span>
@@ -302,7 +284,7 @@
       </a>
     </div>
   </header>
-</{% if section.settings.sticky_header_type != 'none' %}sticky-header{% else %}div{% endif %}>
+</sticky-header>
 
 {%- if settings.cart_type == "notification" -%}
   {%- render 'cart-notification', color_scheme: section.settings.color_scheme, desktop_menu_type: section.settings.menu_type_desktop -%}
@@ -459,6 +441,8 @@
     }
   </script>
 {%- endif -%}
+
+<script src="{{ 'header-hero-header.js' | asset_url }}" defer="defer"></script>
 
 {% schema %}
 {
