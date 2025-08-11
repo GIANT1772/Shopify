@@ -1,0 +1,23 @@
+{%- layout none -%}
+{ "smeCartData": {{ cart | json }}
+{%- if cart and cart.items.size > 0 -%}
+  {%- for item in cart.items -%}
+    ,"{{ item.id }}": { "product": {{ item.product | json }}, "collections": [
+    {%- for collection in item.product.collections -%}
+      { "id": "{{ collection.id }}", "title": "{{ collection.title }}", "handle": "{{ collection.handle }}", "url": "
+      {{- collection.url -}}
+      " }
+      {%- if forloop.last == false -%},{%- endif -%}
+    {%- endfor %}
+    ] }
+  {%- endfor %}
+{%- endif -%}
+{%- if additional_checkout_buttons -%}
+  ,"smeadditional_checkout_buttonsObj": {{ content_for_additional_checkout_buttons | json }}
+{%- endif -%}
+{%- if localization and localization.market -%}
+  ,"market": { "id": "{{ localization.market.id }}" }
+{%- else -%}
+  "market": null
+{%- endif -%}
+}
