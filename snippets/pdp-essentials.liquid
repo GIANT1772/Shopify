@@ -10,37 +10,100 @@
   {% render 'pdp-essentials', block: block, product: product, localization: localization %}
 {% endcomment %}
 <div data-component="pdp-essentials" {{ block.shopify_attributes }}>
-  <ul class="pdp-essentials__list">
-    {%- assign delivery_title = block.settings.delivery_text | default: ('sections.pdp_essentials.delivery' | t) -%}
-    {%- assign delivery_details = block.settings.delivery_details | default: ('sections.pdp_essentials.delivery_details' | t) -%}
-    {%- if delivery_title != blank or delivery_details != blank -%}
-      <li class="pdp-essentials__item pdp-essentials__item--delivery">
-        <span class="pdp-essentials__title">{{ delivery_title }}</span>
-        {%- if delivery_details != blank -%}
-          <div class="pdp-essentials__details">{{ delivery_details }}</div>
-        {%- endif -%}
-      </li>
-    {%- endif -%}
+  {% liquid
+    assign layout = block.settings.layout_style | default: 'bar'
+    assign compact = block.settings.compact_mode
+    assign dividers = block.settings.show_dividers
+  %}
 
-    {%- assign returns_title = block.settings.returns_text | default: ('sections.pdp_essentials.returns' | t) -%}
-    {%- assign returns_details = block.settings.returns_details | default: ('sections.pdp_essentials.returns_details' | t) -%}
-    {%- if returns_title != blank or returns_details != blank -%}
-      <li class="pdp-essentials__item pdp-essentials__item--returns">
-        <span class="pdp-essentials__title">{{ returns_title }}</span>
-        {%- if returns_details != blank -%}
-          <div class="pdp-essentials__details">{{ returns_details }}</div>
-        {%- endif -%}
-      </li>
-    {%- endif -%}
+  {%- assign delivery_title = block.settings.delivery_text | default: ('sections.pdp_essentials.delivery' | t) -%}
+  {%- assign delivery_details = block.settings.delivery_details | default: ('sections.pdp_essentials.delivery_details' | t) -%}
+  {%- assign returns_title = block.settings.returns_text | default: ('sections.pdp_essentials.returns' | t) -%}
+  {%- assign returns_details = block.settings.returns_details | default: ('sections.pdp_essentials.returns_details' | t) -%}
 
-    {%- if block.settings.show_size_link and block.settings.size_guide_page != blank -%}
-      <li class="pdp-essentials__item pdp-essentials__item--size">
-        <a href="{{ block.settings.size_guide_page.url }}" class="pdp-essentials__link">
-          {{ 'sections.pdp_essentials.size_and_fit' | t }}
-        </a>
-      </li>
-    {%- endif -%}
-  </ul>
+  {% case layout %}
+    {% when 'cards' %}
+      <ul style="display:flex;flex-wrap:wrap;list-style:none;margin:0;padding:0;gap:{% if compact %}4px{% else %}8px{% endif %};">
+        {%- if delivery_title != blank or delivery_details != blank -%}
+          <li style="{% if dividers %}border:1px solid currentColor;{% endif %}border-radius:9999px;padding:{% if compact %}2px 8px{% else %}4px 12px{% endif %};">
+            <span>{{ delivery_title }}</span>
+            {%- if delivery_details != blank -%}
+              <div>{{ delivery_details }}</div>
+            {%- endif -%}
+          </li>
+        {%- endif -%}
+
+        {%- if returns_title != blank or returns_details != blank -%}
+          <li style="{% if dividers %}border:1px solid currentColor;{% endif %}border-radius:9999px;padding:{% if compact %}2px 8px{% else %}4px 12px{% endif %};">
+            <span>{{ returns_title }}</span>
+            {%- if returns_details != blank -%}
+              <div>{{ returns_details }}</div>
+            {%- endif -%}
+          </li>
+        {%- endif -%}
+
+        {%- if block.settings.show_size_link and block.settings.size_guide_page != blank -%}
+          <li style="{% if dividers %}border:1px solid currentColor;{% endif %}border-radius:9999px;padding:{% if compact %}2px 8px{% else %}4px 12px{% endif %};">
+            <a href="{{ block.settings.size_guide_page.url }}">{{ 'sections.pdp_essentials.size_and_fit' | t }}</a>
+          </li>
+        {%- endif -%}
+      </ul>
+
+    {% when 'accordion' %}
+      <div style="margin:0;padding:0;">
+        {%- if delivery_title != blank or delivery_details != blank -%}
+          <details style="padding:{% if compact %}4px 0{% else %}8px 0{% endif %};{% if dividers %}border-bottom:1px solid currentColor;{% endif %}">
+            <summary>{{ delivery_title }}</summary>
+            {%- if delivery_details != blank -%}
+              <div>{{ delivery_details }}</div>
+            {%- endif -%}
+          </details>
+        {%- endif -%}
+
+        {%- if returns_title != blank or returns_details != blank -%}
+          <details style="padding:{% if compact %}4px 0{% else %}8px 0{% endif %};{% if dividers %}border-bottom:1px solid currentColor;{% endif %}">
+            <summary>{{ returns_title }}</summary>
+            {%- if returns_details != blank -%}
+              <div>{{ returns_details }}</div>
+            {%- endif -%}
+          </details>
+        {%- endif -%}
+
+        {%- if block.settings.show_size_link and block.settings.size_guide_page != blank -%}
+          <details style="padding:{% if compact %}4px 0{% else %}8px 0{% endif %};{% if dividers %}border-bottom:1px solid currentColor;{% endif %}">
+            <summary><a href="{{ block.settings.size_guide_page.url }}">{{ 'sections.pdp_essentials.size_and_fit' | t }}</a></summary>
+          </details>
+        {%- endif -%}
+      </div>
+
+    {% else %}
+      <ul style="display:flex;flex-wrap:wrap;list-style:none;margin:0;padding:0;gap:{% if compact %}4px{% else %}8px{% endif %};{% if dividers %}border-top:1px solid currentColor;border-bottom:1px solid currentColor;{% endif %}">
+        {%- if delivery_title != blank or delivery_details != blank -%}
+          <li style="padding:{% if compact %}4px 8px{% else %}8px 12px{% endif %};{% if dividers %}border-right:1px solid currentColor;{% endif %}">
+            <span>{{ delivery_title }}</span>
+            {%- if delivery_details != blank -%}
+              <div>{{ delivery_details }}</div>
+            {%- endif -%}
+          </li>
+        {%- endif -%}
+
+        {%- if returns_title != blank or returns_details != blank -%}
+          <li style="padding:{% if compact %}4px 8px{% else %}8px 12px{% endif %};{% if dividers %}border-right:1px solid currentColor;{% endif %}">
+            <span>{{ returns_title }}</span>
+            {%- if returns_details != blank -%}
+              <div>{{ returns_details }}</div>
+            {%- endif -%}
+          </li>
+        {%- endif -%}
+
+        {%- if block.settings.show_size_link and block.settings.size_guide_page != blank -%}
+          <li style="padding:{% if compact %}4px 8px{% else %}8px 12px{% endif %};">
+            <a href="{{ block.settings.size_guide_page.url }}">{{ 'sections.pdp_essentials.size_and_fit' | t }}</a>
+          </li>
+        {%- endif -%}
+      </ul>
+  {% endcase %}
+
   {%- assign trust_line_text = block.settings.trust_line | default: ('sections.pdp_essentials.trust_line' | t) -%}
   {%- if trust_line_text != blank -%}
     <p class="pdp-essentials__trust-line">{{ trust_line_text }}</p>
