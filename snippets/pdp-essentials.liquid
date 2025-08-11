@@ -45,7 +45,7 @@
 
         {%- if block.settings.show_size_link and block.settings.size_guide_page != blank -%}
           <li style="{% if dividers %}border:1px solid currentColor;{% endif %}border-radius:9999px;padding:{% if compact %}2px 8px{% else %}4px 12px{% endif %};">
-            <a href="{{ block.settings.size_guide_page.url }}">{{ 'sections.pdp_essentials.size_and_fit' | t }}</a>
+            <a href="{{ block.settings.size_guide_page.url }}"{% unless block.settings.link_behavior == 'modal' %} target="_blank" rel="noopener"{% endunless %} data-size-guide-link data-event="pdp_essentials_click" data-item="size">{{ 'sections.pdp_essentials.size_and_fit' | t }}</a>
           </li>
         {%- endif -%}
       </ul>
@@ -66,7 +66,7 @@
 
         {%- if block.settings.show_size_link and block.settings.size_guide_page != blank -%}
           <div style="padding:{% if compact %}4px 0{% else %}8px 0{% endif %};{% if dividers %}border-bottom:1px solid currentColor;{% endif %}">
-            <a href="{{ block.settings.size_guide_page.url }}">{{ 'sections.pdp_essentials.size_and_fit' | t }}</a>
+            <a href="{{ block.settings.size_guide_page.url }}"{% unless block.settings.link_behavior == 'modal' %} target="_blank" rel="noopener"{% endunless %} data-size-guide-link data-event="pdp_essentials_click" data-item="size">{{ 'sections.pdp_essentials.size_and_fit' | t }}</a>
           </div>
         {%- endif -%}
       </div>
@@ -87,7 +87,7 @@
 
         {%- if block.settings.show_size_link and block.settings.size_guide_page != blank -%}
           <li style="padding:{% if compact %}4px 8px{% else %}8px 12px{% endif %};">
-            <a href="{{ block.settings.size_guide_page.url }}">{{ 'sections.pdp_essentials.size_and_fit' | t }}</a>
+            <a href="{{ block.settings.size_guide_page.url }}"{% unless block.settings.link_behavior == 'modal' %} target="_blank" rel="noopener"{% endunless %} data-size-guide-link data-event="pdp_essentials_click" data-item="size">{{ 'sections.pdp_essentials.size_and_fit' | t }}</a>
           </li>
         {%- endif -%}
       </ul>
@@ -111,6 +111,8 @@
       function closeModal(){if(modal){modal.close();modal.removeEventListener('keydown',trap);}}
       function openNewTab(content){var w=window.open('','_blank');w.document.write(content);}
       triggers.forEach(function(t){var id=t.getAttribute('aria-controls');var html=document.getElementById(id)?.innerHTML||'';if(mobile){t.addEventListener('click',function(e){e.preventDefault();if(linkBehavior==='modal'&&supportsModal){openModal(html);}else{openNewTab(html);}});}else{var tip;function show(){tip=tip||document.createElement('div');tip.className='pdp-essentials__tooltip';tip.innerHTML=html;document.body.appendChild(tip);var r=t.getBoundingClientRect();tip.style.position='absolute';tip.style.top=(r.bottom+window.scrollY)+'px';tip.style.left=(r.left+window.scrollX)+'px';tip.hidden=false;}function hide(){if(tip)tip.hidden=true;}t.addEventListener('mouseenter',show);t.addEventListener('focus',show);t.addEventListener('mouseleave',hide);t.addEventListener('blur',hide);}});
+      var sizeLink=container.querySelector('[data-size-guide-link]');
+      if(sizeLink){sizeLink.addEventListener('click',function(e){if(linkBehavior==='modal'&&supportsModal){e.preventDefault();fetch(sizeLink.href).then(function(r){return r.text();}).then(function(html){var doc=new DOMParser().parseFromString(html,'text/html');openModal(doc.body.innerHTML);});}});}
       document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
     })();
   </script>
