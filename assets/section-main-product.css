@@ -1472,3 +1472,15 @@ a.product__text {
     border: none;
   }
 }
+
+.pdp-essentials__trust-line {
+  margin-top: 1rem;
+}
+
+@media screen and (max-width: 749px) {
+  .pdp-essentials__trust-line {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
