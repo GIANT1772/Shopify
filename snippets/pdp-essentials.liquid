@@ -1,0 +1,48 @@
+{% comment %}
+  Renders essential product information such as delivery, returns, size & fit and a trust line.
+
+  Accepts:
+  - block: {Object} block object containing settings for the snippet.
+  - product: {Object} product object (unused).
+  - localization: {Object} localization object (unused).
+
+  Usage:
+  {% render 'pdp-essentials', block: block, product: product, localization: localization %}
+{% endcomment %}
+<div data-component="pdp-essentials" {{ block.shopify_attributes }}>
+  <ul class="pdp-essentials__list">
+    {%- assign delivery_title = block.settings.delivery_text | default: ('sections.pdp_essentials.delivery' | t) -%}
+    {%- assign delivery_details = block.settings.delivery_details | default: ('sections.pdp_essentials.delivery_details' | t) -%}
+    {%- if delivery_title != blank or delivery_details != blank -%}
+      <li class="pdp-essentials__item pdp-essentials__item--delivery">
+        <span class="pdp-essentials__title">{{ delivery_title }}</span>
+        {%- if delivery_details != blank -%}
+          <div class="pdp-essentials__details">{{ delivery_details }}</div>
+        {%- endif -%}
+      </li>
+    {%- endif -%}
+
+    {%- assign returns_title = block.settings.returns_text | default: ('sections.pdp_essentials.returns' | t) -%}
+    {%- assign returns_details = block.settings.returns_details | default: ('sections.pdp_essentials.returns_details' | t) -%}
+    {%- if returns_title != blank or returns_details != blank -%}
+      <li class="pdp-essentials__item pdp-essentials__item--returns">
+        <span class="pdp-essentials__title">{{ returns_title }}</span>
+        {%- if returns_details != blank -%}
+          <div class="pdp-essentials__details">{{ returns_details }}</div>
+        {%- endif -%}
+      </li>
+    {%- endif -%}
+
+    {%- if block.settings.show_size_link and block.settings.size_guide_page != blank -%}
+      <li class="pdp-essentials__item pdp-essentials__item--size">
+        <a href="{{ block.settings.size_guide_page.url }}" class="pdp-essentials__link">
+          {{ 'sections.pdp_essentials.size_and_fit' | t }}
+        </a>
+      </li>
+    {%- endif -%}
+  </ul>
+  {%- assign trust_line_text = block.settings.trust_line | default: ('sections.pdp_essentials.trust_line' | t) -%}
+  {%- if trust_line_text != blank -%}
+    <p class="pdp-essentials__trust-line">{{ trust_line_text }}</p>
+  {%- endif -%}
+</div>
