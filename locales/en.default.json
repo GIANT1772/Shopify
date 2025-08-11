@@ -366,6 +366,14 @@
       "min_error": "This item has a minimum of {{ min }}",
       "max_error": "This item has a maximum of {{ max }}",
       "step_error": "You can only add this item in increments of {{ step }}"
+    },
+    "pdp_essentials": {
+      "delivery": "Delivery",
+      "delivery_details": "Standard delivery in 2-5 business days",
+      "returns": "Returns",
+      "returns_details": "Free 30 day returns",
+      "size_and_fit": "Size & Fit",
+      "trust_line": "100% secure checkout"
     }
   },
   "localization": {
