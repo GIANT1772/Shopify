@@ -43,7 +43,10 @@ if (!customElements.get('quantity-popover')) {
 
         if (event.type === 'click' && this.eventMouseEnterHappened) return;
 
-        const button = this.infoButtonDesktop && this.mql.matches ? this.infoButtonDesktop : this.infoButtonMobile;
+        const button =
+          this.infoButtonDesktop && this.mql.matches
+            ? this.infoButtonDesktop
+            : this.infoButtonMobile || this.infoButtonDesktop;
         const isExpanded = button.getAttribute('aria-expanded') === 'true';
 
         if ((this.mql.matches && !isExpanded) || event.type === 'click') {
@@ -53,7 +56,7 @@ if (!customElements.get('quantity-popover')) {
 
           button.classList.toggle('quantity-popover__info-button--open');
 
-          this.infoButtonDesktop.classList.add('quantity-popover__info-button--icon-only--animation');
+          this.infoButtonDesktop?.classList.add('quantity-popover__info-button--icon-only--animation');
         }
 
         const isOpen = button.getAttribute('aria-expanded') === 'true';
@@ -70,16 +73,20 @@ if (!customElements.get('quantity-popover')) {
 
       closePopover(event) {
         event.preventDefault();
-        const isButtonChild = this.infoButtonDesktop.contains(event.relatedTarget);
+        const isButtonChild =
+          this.infoButtonDesktop && this.infoButtonDesktop.contains(event.relatedTarget);
         const isPopoverChild = this.popoverInfo.contains(event.relatedTarget);
 
-        const button = this.infoButtonDesktop && this.mql.matches ? this.infoButtonDesktop : this.infoButtonMobile;
+        const button =
+          this.infoButtonDesktop && this.mql.matches
+            ? this.infoButtonDesktop
+            : this.infoButtonMobile || this.infoButtonDesktop;
 
         if (!isButtonChild && !isPopoverChild) {
           button.setAttribute('aria-expanded', 'false');
           button.classList.remove('quantity-popover__info-button--open');
           this.popoverInfo.setAttribute('hidden', '');
-          this.infoButtonDesktop.classList.remove('quantity-popover__info-button--icon-only--animation');
+          this.infoButtonDesktop?.classList.remove('quantity-popover__info-button--icon-only--animation');
         }
 
         this.eventMouseEnterHappened = false;
