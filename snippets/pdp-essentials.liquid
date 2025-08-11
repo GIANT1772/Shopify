@@ -93,9 +93,14 @@
       </ul>
   {% endcase %}
 
-  {%- assign trust_line_text = block.settings.trust_line | default: ('sections.pdp_essentials.trust_line' | t) -%}
+  {%- assign trust_line_setting = block.settings.trust_line -%}
+  {%- if trust_line_setting == blank and block.settings.hide_if_empty -%}
+    {%- assign trust_line_text = blank -%}
+  {%- else -%}
+    {%- assign trust_line_text = trust_line_setting | default: ('sections.pdp_essentials.trust_line' | t) -%}
+  {%- endif -%}
   {%- if trust_line_text != blank -%}
-    <p class="pdp-essentials__trust-line">{{ trust_line_text }}</p>
+    <div class="pdp-essentials__trust-line" title="{{ trust_line_text | escape }}">{{ trust_line_text }}</div>
   {%- endif -%}
 
   <script>
