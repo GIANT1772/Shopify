@@ -14,14 +14,51 @@
     assign layout = block.settings.layout_style | default: 'bar'
     assign compact = block.settings.compact_mode
     assign dividers = block.settings.show_dividers
-  %}
+    assign use_metafields = block.settings.use_metafields
 
-  {%- assign delivery_title = block.settings.delivery_text | default: ('sections.pdp_essentials.delivery' | t) -%}
-  {%- assign delivery_details = block.settings.delivery_details | default: ('sections.pdp_essentials.delivery_details' | t) -%}
-  {%- assign returns_title = block.settings.returns_text | default: ('sections.pdp_essentials.returns' | t) -%}
-  {%- assign returns_details = block.settings.returns_details | default: ('sections.pdp_essentials.returns_details' | t) -%}
-  {%- assign size_text = 'sections.pdp_essentials.size_and_fit' | t -%}
-  {%- assign hide_if_empty = block.settings.hide_if_empty -%}
+    assign delivery_title = blank
+    if use_metafields
+      if localization.country.iso_code == 'IN' and product.metafields.custom.delivery_text_in != blank
+        assign delivery_title = product.metafields.custom.delivery_text_in
+      elsif product.metafields.custom.delivery_text_global != blank
+        assign delivery_title = product.metafields.custom.delivery_text_global
+      else
+        assign delivery_title = product.metafields.custom.delivery_text
+      endif
+    endif
+    if delivery_title == blank
+      if localization.country.iso_code == 'IN' and block.settings.delivery_text_in != blank
+        assign delivery_title = block.settings.delivery_text_in
+      elsif block.settings.delivery_text_global != blank
+        assign delivery_title = block.settings.delivery_text_global
+      else
+        assign delivery_title = block.settings.delivery_text
+      endif
+    endif
+
+    assign returns_title = blank
+    if use_metafields
+      assign returns_title = product.metafields.custom.returns_text
+    endif
+    if returns_title == blank
+      assign returns_title = block.settings.returns_text
+    endif
+
+    assign delivery_details = block.settings.delivery_details
+    assign returns_details = block.settings.returns_details
+    assign size_text = 'sections.pdp_essentials.size_and_fit' | t
+    assign hide_if_empty = block.settings.hide_if_empty
+
+    assign delivery_title = delivery_title | default: 'sections.pdp_essentials.delivery'
+    assign returns_title = returns_title | default: 'sections.pdp_essentials.returns'
+    assign delivery_details = delivery_details | default: 'sections.pdp_essentials.delivery_details'
+    assign returns_details = returns_details | default: 'sections.pdp_essentials.returns_details'
+
+    assign delivery_title = delivery_title | t
+    assign returns_title = returns_title | t
+    assign delivery_details = delivery_details | t
+    assign returns_details = returns_details | t
+  %}
 
   {%- assign show_delivery = delivery_title != blank or delivery_details != blank -%}
   {%- if hide_if_empty and delivery_title == blank -%}
@@ -114,7 +151,8 @@
   {%- if trust_line_setting == blank and hide_if_empty -%}
     {%- assign trust_line_text = blank -%}
   {%- else -%}
-    {%- assign trust_line_text = trust_line_setting | default: ('sections.pdp_essentials.trust_line' | t) -%}
+    {%- assign trust_line_text = trust_line_setting | default: 'sections.pdp_essentials.trust_line' -%}
+    {%- assign trust_line_text = trust_line_text | t -%}
   {%- endif -%}
   {%- if trust_line_text != blank -%}
     <div class="pdp-essentials__trust-line" title="{{ trust_line_text | escape }}">{{ trust_line_text }}</div>
