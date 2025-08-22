@@ -321,7 +321,8 @@
         let totalWidth = 0;
         
         this.state.slides.forEach((slide, index) => {
-          const rect = slide.getBoundingClientRect();
+          const card = slide.querySelector('.rbc-card');
+          const rect = (card || slide).getBoundingClientRect();
           totalWidth += rect.width;
           if (index < this.state.slides.length - 1) {
             totalWidth += gap;
