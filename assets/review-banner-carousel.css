@@ -84,19 +84,16 @@
 /* Advanced Carousel System */
 .rbc-carousel-wrapper {
   position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.rbc-section.rbc-full-width .rbc-carousel-wrapper {
   width: 100vw;
   margin-left: 50%;
   transform: translateX(-50%);
-  overflow: hidden;
   mask-image: var(--rbc-gradient-mask);
   -webkit-mask-image: var(--rbc-gradient-mask);
-}
-.rbc-section:not(.rbc-full-width) .rbc-carousel-wrapper {
-  width: 100%;
-  margin-left: 0;
-  transform: none;
-  mask-image: none;
-  -webkit-mask-image: none;
 }
 
 
