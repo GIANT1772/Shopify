@@ -3354,9 +3354,17 @@
           }
         }
       },
-      "presets": {
-        "name": "Collapsible content"
+        "presets": {
+          "name": "Collapsible content"
+        }
+      },
+      "review_banner_carousel": {
+        "name": "Review banner carousel",
+        "settings": {
+          "autoplay": {
+            "label": "Autoplay"
+          }
+        }
       }
     }
   }
-}
