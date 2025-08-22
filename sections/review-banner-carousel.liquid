@@ -27,6 +27,7 @@
   assign color_scheme = section.settings.color_scheme | default: 'background-1'
   assign scroll_speed = section.settings.scroll_speed | default: 60
   assign scroll_direction = section.settings.scroll_direction | default: 'left'
+  assign autoplay = section.settings.autoplay
   assign pause_on_hover = section.settings.pause_on_hover
   assign show_navigation = section.settings.show_navigation
   assign show_pagination = section.settings.show_pagination
@@ -301,6 +302,7 @@
         class="rbc-carousel-wrapper"
         data-scroll-speed="{{ scroll_speed }}"
         data-direction="{{ scroll_direction }}"
+        data-autoplay="{{ section.settings.autoplay }}"
         data-pause-on-hover="{{ pause_on_hover }}"
         data-image-strategy="{{ lazy_load_strategy }}"
         data-drag-enabled="true"
@@ -742,6 +744,12 @@
         {"value": "right", "label": "→ Right"}
       ],
       "default": "left"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Autoplay",
+      "default": true
     },
     {
       "type": "checkbox",
