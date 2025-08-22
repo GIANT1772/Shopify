@@ -1,0 +1,1039 @@
+{% comment %}
+  Advanced Review Banner Carousel Section
+  Author: Staff Engineer
+  Version: 3.0.0
+  Compatible: Dawn 14.0.0+
+  Features: Mixed data source, video reviews, advanced animations, accessibility, SEO
+{% endcomment %}
+
+{%- liquid
+  # Performance and error handling
+  assign section_id = 'rbc-' | append: section.id
+  assign reviews_data = section.blocks | where: 'type', 'review'
+  assign total_reviews = reviews_data.size
+  
+  # Fallback for empty state
+  if total_reviews == 0
+    assign show_empty_state = true
+  else
+    assign show_empty_state = false
+  endif
+  
+  # Configuration from settings
+  assign animation_style = section.settings.animation_style | default: 'smooth'
+  assign card_style = section.settings.card_style | default: 'modern'
+  assign color_scheme = section.settings.color_scheme | default: 'background-1'
+  assign scroll_speed = section.settings.scroll_speed | default: 60
+  assign scroll_direction = section.settings.scroll_direction | default: 'left'
+  assign pause_on_hover = section.settings.pause_on_hover
+  assign show_navigation = section.settings.show_navigation
+  assign show_pagination = section.settings.show_pagination
+  assign enable_video_reviews = section.settings.enable_video_reviews
+  assign max_reviews_display = section.settings.max_reviews | default: 50
+  
+  # Responsive settings
+  assign slides_mobile = section.settings.slides_mobile | default: 1.2
+  assign slides_tablet = section.settings.slides_tablet | default: 2.5
+  assign slides_desktop = section.settings.slides_desktop | default: 3.5
+  
+  # Advanced features
+  assign enable_schema = section.settings.enable_schema_markup
+  assign enable_analytics = section.settings.enable_analytics
+  assign lazy_load_strategy = section.settings.lazy_load_strategy | default: 'intersection'
+  assign image_aspect_ratio = section.settings.image_aspect_ratio | default: 'auto'
+  
+  # Filter and limit reviews for performance
+  if max_reviews_display > 0
+    assign reviews_data = reviews_data | slice: 0, max_reviews_display
+  endif
+  
+  # Generate unique IDs for accessibility
+  assign carousel_id = section_id | append: '-carousel'
+  assign heading_id = section_id | append: '-heading'
+  assign live_region_id = section_id | append: '-live-region'
+  
+  # Calculate average rating for schema
+  assign total_rating = 0
+  assign review_count = reviews_data.size
+  for review in reviews_data
+    assign review_rating = review.settings.rating | default: 5
+    assign total_rating = total_rating | plus: review_rating
+  endfor
+  
+  if review_count > 0
+    assign average_rating = total_rating | divided_by: review_count | round: 1
+  else
+    assign average_rating = 0
+  endif
+-%}
+
+{%- style -%}
+  #{{ section_id }} {
+    /* Dynamic CSS Custom Properties */
+    --rbc-scroll-speed: {{ scroll_speed }}s;
+    --rbc-slides-mobile: {{ slides_mobile }};
+    --rbc-slides-tablet: {{ slides_tablet }};
+    --rbc-slides-desktop: {{ slides_desktop }};
+    --rbc-slide-gap-mobile: {{ section.settings.slide_gap_mobile | default: 16 }}px;
+    --rbc-slide-gap-desktop: {{ section.settings.slide_gap_desktop | default: 24 }}px;
+    
+    /* Color scheme integration */
+    --rbc-bg-primary: rgb(var(--color-{{ color_scheme }}-background));
+    --rbc-text-primary: rgb(var(--color-{{ color_scheme }}-text));
+    --rbc-text-secondary: rgba(var(--color-{{ color_scheme }}-text), 0.75);
+    --rbc-border: rgba(var(--color-{{ color_scheme }}-text), 0.08);
+    --rbc-accent: rgb(var(--color-base-accent-1));
+    --rbc-accent-hover: rgb(var(--color-base-accent-2));
+    
+    /* Dynamic card styling based on style */
+    {% case card_style %}
+      {% when 'modern' %}
+        --rbc-card-bg: rgba(var(--color-{{ color_scheme }}-background), 0.8);
+        --rbc-card-backdrop: blur(20px) saturate(180%);
+        --rbc-card-border: 1px solid rgba(var(--color-{{ color_scheme }}-text), 0.1);
+        --rbc-card-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05);
+        --rbc-card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1);
+        --rbc-card-radius: 24px;
+      {% when 'classic' %}
+        --rbc-card-bg: rgb(var(--color-{{ color_scheme }}-background));
+        --rbc-card-backdrop: none;
+        --rbc-card-border: 2px solid rgba(var(--color-{{ color_scheme }}-text), 0.1);
+        --rbc-card-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        --rbc-card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.12);
+        --rbc-card-radius: 16px;
+      {% when 'minimal' %}
+        --rbc-card-bg: transparent;
+        --rbc-card-backdrop: none;
+        --rbc-card-border: 1px solid rgba(var(--color-{{ color_scheme }}-text), 0.05);
+        --rbc-card-shadow: none;
+        --rbc-card-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.08);
+        --rbc-card-radius: 12px;
+      {% when 'premium' %}
+        --rbc-card-bg: linear-gradient(135deg, rgba(var(--color-{{ color_scheme }}-background), 0.95), rgba(var(--color-{{ color_scheme }}-background), 0.8));
+        --rbc-card-backdrop: blur(40px) saturate(200%);
+        --rbc-card-border: 1px solid rgba(255, 255, 255, 0.2);
+        --rbc-card-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 8px 20px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        --rbc-card-shadow-hover: 0 24px 48px rgba(0, 0, 0, 0.16), 0 12px 24px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        --rbc-card-radius: 20px;
+    {% endcase %}
+    
+    /* Animation timing based on style */
+    {% case animation_style %}
+      {% when 'smooth' %}
+        --rbc-transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        --rbc-transition-fast: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      {% when 'bounce' %}
+        --rbc-transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        --rbc-transition-fast: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      {% when 'sharp' %}
+        --rbc-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        --rbc-transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      {% when 'elastic' %}
+        --rbc-transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        --rbc-transition-fast: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    {% endcase %}
+  }
+  
+  /* Section-specific responsive adjustments */
+  @media screen and (max-width: 749px) {
+    #{{ section_id }} .rbc-slide {
+      width: calc((100vw - var(--page-width-margin) * 2 - var(--rbc-slide-gap-mobile) * (var(--rbc-slides-mobile) - 1)) / var(--rbc-slides-mobile));
+    }
+  }
+  
+  @media screen and (min-width: 750px) and (max-width: 989px) {
+    #{{ section_id }} .rbc-slide {
+      width: calc((100vw - var(--page-width-margin) * 2 - var(--rbc-slide-gap-desktop) * (var(--rbc-slides-tablet) - 1)) / var(--rbc-slides-tablet));
+    }
+  }
+  
+  @media screen and (min-width: 990px) {
+    #{{ section_id }} .rbc-slide {
+      width: calc((var(--page-width) - var(--rbc-slide-gap-desktop) * (var(--rbc-slides-desktop) - 1)) / var(--rbc-slides-desktop));
+    }
+  }
+{%- endstyle -%}
+
+{%- if enable_schema and total_reviews > 0 -%}
+  <!-- Schema.org Markup for SEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": {{ shop.name | json }},
+    "url": {{ shop.url | json }},
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "{{ average_rating }}",
+      "reviewCount": {{ total_reviews }},
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    "review": [
+      {%- for block in reviews_data limit: 10 -%}
+        {%- liquid
+          assign review_rating = block.settings.rating | default: 5
+          assign review_text = block.settings.review_text | strip_html | truncate: 200
+          assign customer_name = block.settings.customer_name | default: 'Anonymous'
+          assign review_date = block.settings.review_date | default: 'now' | date: '%Y-%m-%d'
+        -%}
+        {
+          "@type": "Review",
+          "reviewRating": {
+            "@type": "Rating",
+            "ratingValue": "{{ review_rating }}",
+            "bestRating": "5",
+            "worstRating": "1"
+          },
+          "author": {
+            "@type": "Person",
+            "name": {{ customer_name | json }}
+          },
+          "reviewBody": {{ review_text | json }},
+          "datePublished": "{{ review_date }}"
+        }{% unless forloop.last %},{% endunless %}
+      {%- endfor -%}
+    ]
+  }
+  </script>
+{%- endif -%}
+
+<section 
+  id="{{ section_id }}"
+  class="rbc-section color-{{ color_scheme }} gradient{% if section.settings.full_width %} rbc-full-width{% endif %}"
+  data-section-id="{{ section.id }}"
+  data-total-reviews="{{ total_reviews }}"
+  {% if enable_analytics %}data-analytics-enabled="true"{% endif %}
+  role="region"
+  aria-labelledby="{{ heading_id }}"
+  {% if section.settings.section_padding_top != blank %}
+    style="padding-top: {{ section.settings.section_padding_top }}px; padding-bottom: {{ section.settings.section_padding_bottom }}px;"
+  {% endif %}
+>
+  <div class="rbc-container{% unless section.settings.full_width %} page-width{% endunless %}">
+    
+    {%- unless section.settings.heading == blank and section.settings.subheading == blank -%}
+      <div class="rbc-header">
+        {%- if section.settings.heading != blank -%}
+          <h2 id="{{ heading_id }}" class="rbc-heading {{ section.settings.heading_size }}">
+            {{ section.settings.heading }}
+          </h2>
+        {%- endif -%}
+        
+        {%- if section.settings.subheading != blank -%}
+          <div class="rbc-subheading">
+            {{ section.settings.subheading }}
+          </div>
+        {%- endif -%}
+        
+        {%- if section.settings.show_aggregate_rating and total_reviews > 0 -%}
+          <div class="rbc-aggregate-rating">
+            <div class="rbc-aggregate-stars">
+              {%- render 'rbc-components', type: 'star-rating', rating: average_rating, size: 'large' -%}
+            </div>
+            
+            <div class="rbc-aggregate-text">
+              <span class="rbc-aggregate-score">{{ average_rating }}</span>
+              <span class="rbc-aggregate-divider">•</span>
+              <span class="rbc-aggregate-count">
+                {{ review_count }} 
+                {%- if review_count == 1 -%}
+                  review
+                {%- else -%}
+                  reviews
+                {%- endif -%}
+              </span>
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endunless -%}
+
+    {%- if show_empty_state -%}
+      <!-- Empty State -->
+      <div class="rbc-empty-state">
+        <div class="rbc-empty-icon">⭐</div>
+        <h3 class="rbc-empty-title">{{ section.settings.empty_state_title | default: 'No reviews yet' }}</h3>
+        <p class="rbc-empty-description">
+          {{ section.settings.empty_state_description | default: 'Be the first to share your experience with our products.' }}
+        </p>
+        {%- if section.settings.empty_state_button_text != blank and section.settings.empty_state_button_url != blank -%}
+          <a href="{{ section.settings.empty_state_button_url }}" class="rbc-cta-button">
+            {{ section.settings.empty_state_button_text }}
+            <span class="rbc-cta-icon">→</span>
+          </a>
+        {%- endif -%}
+      </div>
+    {%- else -%}
+      
+      <!-- Carousel Controls (if enabled) -->
+      {%- if show_navigation and total_reviews > 1 -%}
+        <div class="rbc-controls">
+          <button 
+            type="button" 
+            class="rbc-control-btn rbc-control-prev"
+            aria-label="Previous slide"
+            data-rbc-control="prev"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15,18 9,12 15,6"/>
+            </svg>
+          </button>
+          
+          <button 
+            type="button" 
+            class="rbc-control-btn rbc-control-play-pause"
+            aria-label="Pause slideshow"
+            data-rbc-control="play-pause"
+          >
+            <span class="rbc-play-icon">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </span>
+            <span class="rbc-pause-icon">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+              </svg>
+            </span>
+          </button>
+          
+          <button 
+            type="button" 
+            class="rbc-control-btn rbc-control-next"
+            aria-label="Next slide"
+            data-rbc-control="next"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9,18 15,12 9,6"/>
+            </svg>
+          </button>
+        </div>
+      {%- endif -%}
+
+      <!-- Main Carousel -->
+      <div 
+        class="rbc-carousel-wrapper"
+        data-scroll-speed="{{ scroll_speed }}"
+        data-direction="{{ scroll_direction }}"
+        data-pause-on-hover="{{ pause_on_hover }}"
+        data-lazy-load="{{ lazy_load_strategy }}"
+        data-enable-drag="true"
+        data-enable-keyboard="true"
+        data-animation-style="{{ animation_style }}"
+        {% if enable_analytics %}data-analytics="true"{% endif %}
+        role="region"
+        aria-live="polite"
+        aria-atomic="false"
+        tabindex="0"
+      >
+        <div class="rbc-carousel-track">
+          <div class="rbc-carousel-content">
+            
+            {%- for block in reviews_data -%}
+              {%- liquid
+                assign review_id = block.id
+                assign customer_name = block.settings.customer_name
+                assign customer_location = block.settings.customer_location
+                assign customer_avatar = block.settings.customer_avatar
+                assign rating = block.settings.rating | default: 5
+                assign review_text = block.settings.review_text
+                assign review_date = block.settings.review_date
+                assign product_image = block.settings.product_image
+                assign product_title = block.settings.product_title
+                assign is_verified = block.settings.is_verified | default: false
+                assign review_platform = block.settings.review_platform | default: 'Website'
+                assign video_url = block.settings.video_url
+                assign has_video = false
+                
+                if enable_video_reviews and video_url != blank
+                  assign has_video = true
+                endif
+                
+                # Calculate review age for authenticity
+                if review_date != blank
+                  assign review_date_obj = review_date | date: '%s'
+                  assign current_date = 'now' | date: '%s'
+                  assign days_ago = current_date | minus: review_date_obj | divided_by: 86400
+                else
+                  assign days_ago = 0
+                endif
+              -%}
+              
+              <article 
+                class="rbc-slide rbc-slide--{{ card_style }}"
+                data-block-id="{{ block.id }}"
+                data-rating="{{ rating }}"
+                data-platform="{{ review_platform | downcase | handle }}"
+                {% if has_video %}data-has-video="true"{% endif %}
+                role="article"
+                aria-setsize="{{ total_reviews }}"
+                aria-posinset="{{ forloop.index }}"
+                tabindex="-1"
+                {{ block.shopify_attributes }}
+              >
+                
+                {%- if product_image != blank or has_video -%}
+                  <div class="rbc-image-wrapper" data-aspect="{{ image_aspect_ratio }}">
+                    {%- if has_video -%}
+                      <!-- Video Review -->
+                      <div class="rbc-video-container">
+                        {%- render 'rbc-components', 
+                          type: 'video-player', 
+                          video_url: video_url, 
+                          poster: product_image,
+                          review_id: review_id 
+                        -%}
+                        <div class="rbc-video-overlay">
+                          <button class="rbc-video-play-btn" aria-label="Play review video">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M8 5v14l11-7z"/>
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    {%- elsif product_image != blank -%}
+                      <!-- Product Image -->
+                      {%- liquid
+                        assign image_loading = 'lazy'
+                        if forloop.index <= 3
+                          assign image_loading = 'eager'
+                        endif
+                      -%}
+                      
+                      {%- render 'rbc-components',
+                        type: 'responsive-image',
+                        image: product_image,
+                        alt: product_title | default: customer_name | append: ' review',
+                        loading: image_loading,
+                        sizes: '(max-width: 749px) 90vw, (max-width: 989px) 45vw, 33vw',
+                        class: 'rbc-image',
+                        aspect_ratio: image_aspect_ratio
+                      -%}
+                      
+                      {%- if product_title != blank -%}
+                        <div class="rbc-product-badge">
+                          {{ product_title }}
+                        </div>
+                      {%- endif -%}
+                    {%- endif -%}
+                  </div>
+                {%- endif -%}
+
+                <div class="rbc-content">
+                  
+                  <!-- Rating Stars -->
+                  <div class="rbc-rating" role="img" aria-label="{{ rating }} out of 5 stars">
+                    {%- render 'rbc-components', type: 'star-rating', rating: rating, size: 'medium' -%}
+                  </div>
+
+                  <!-- Customer Information -->
+                  <div class="rbc-customer-info">
+                    <div class="rbc-avatar">
+                      {%- if customer_avatar != blank -%}
+                        {{- customer_avatar | image_url: width: 96 | image_tag: 
+                            loading: 'lazy',
+                            alt: customer_name,
+                            width: 48,
+                            height: 48
+                        -}}
+                      {%- else -%}
+                        <span class="rbc-avatar-initials">
+                          {{- customer_name | default: 'A' | slice: 0, 1 | upcase -}}
+                        </span>
+                      {%- endif -%}
+                    </div>
+                    
+                    <div class="rbc-customer-details">
+                      <div class="rbc-customer-name">
+                        {{ customer_name | default: 'Verified Customer' }}
+                        {%- if is_verified -%}
+                          <span class="rbc-verified-badge" aria-label="Verified purchase">
+                            {%- render 'rbc-components', type: 'verified-icon' -%}
+                          </span>
+                        {%- endif -%}
+                      </div>
+                      
+                      {%- if customer_location != blank -%}
+                        <div class="rbc-customer-location">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                          </svg>
+                          {{ customer_location }}
+                        </div>
+                      {%- endif -%}
+                    </div>
+                  </div>
+
+                  <!-- Review Text -->
+                  {%- if review_text != blank -%}
+                    <blockquote class="rbc-review-text">
+                      {{ review_text }}
+                    </blockquote>
+                  {%- endif -%}
+
+                  <!-- Review Metadata -->
+                  <div class="rbc-review-meta">
+                    <div class="rbc-review-date">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                      </svg>
+                      {%- if review_date != blank -%}
+                        <time datetime="{{ review_date | date: '%Y-%m-%d' }}">
+                          {%- if days_ago <= 7 -%}
+                            {{ days_ago }} days ago
+                          {%- else -%}
+                            {{ review_date | date: '%B %d, %Y' }}
+                          {%- endif -%}
+                        </time>
+                      {%- else -%}
+                        <span>Recently</span>
+                      {%- endif -%}
+                    </div>
+                    
+                    <div class="rbc-review-platform">
+                      {%- render 'rbc-components', type: 'platform-icon', platform: review_platform -%}
+                      {{ review_platform }}
+                    </div>
+                  </div>
+
+                  <!-- CTA Button (if specified) -->
+                  {%- if block.settings.cta_text != blank and block.settings.cta_url != blank -%}
+                    <a 
+                      href="{{ block.settings.cta_url }}" 
+                      class="rbc-cta-button"
+                      {% if block.settings.cta_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}
+                    >
+                      {{ block.settings.cta_text }}
+                      <span class="rbc-cta-icon">→</span>
+                    </a>
+                  {%- endif -%}
+                  
+                </div>
+              </article>
+              
+            {%- endfor -%}
+            
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination Dots (if enabled) -->
+      {%- if show_pagination and total_reviews > 1 -%}
+        <div class="rbc-pagination" role="tablist">
+          {%- for i in (1..total_reviews) -%}
+            <button 
+              type="button" 
+              class="rbc-pagination-dot{% if forloop.first %} is-active{% endif %}"
+              data-rbc-slide="{{ forloop.index0 }}"
+              aria-label="Go to slide {{ forloop.index }}"
+              role="tab"
+              aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+            ></button>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+    {%- endif -%}
+
+    <!-- Live region for accessibility announcements -->
+    <div id="{{ live_region_id }}" class="rbc-sr-only" aria-live="polite" aria-atomic="true"></div>
+    
+    <!-- Loading indicator -->
+    <div class="rbc-loading-indicator" aria-hidden="true">
+      <div class="rbc-spinner"></div>
+    </div>
+
+  </div>
+</section>
+
+{%- unless request.design_mode -%}
+  {%- comment -%} Initialize carousel in production {%- endcomment -%}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.AdvancedReviewCarousel) {
+        const carousel = document.querySelector('#{{ section_id }} .rbc-carousel-wrapper');
+        if (carousel && !carousel.classList.contains('rbc-ready')) {
+          window.AdvancedReviewCarousel.init(carousel);
+        }
+      }
+    });
+  </script>
+{%- endunless -%}
+
+{% schema %}
+{
+  "name": "🌟 Review Banner Carousel",
+  "tag": "section",
+  "class": "section-review-banner-carousel",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "📝 Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Section heading",
+      "default": "What Our Customers Say"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        {"value": "h3", "label": "Small"},
+        {"value": "h2", "label": "Medium"},
+        {"value": "h1", "label": "Large"},
+        {"value": "hxl", "label": "Extra large"}
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Trusted by thousands of customers worldwide"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_aggregate_rating",
+      "label": "Show aggregate rating",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "🎨 Design & Layout"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "options": [
+        {"value": "background-1", "label": "Background 1"},
+        {"value": "background-2", "label": "Background 2"},
+        {"value": "inverse", "label": "Inverse"},
+        {"value": "accent-1", "label": "Accent 1"},
+        {"value": "accent-2", "label": "Accent 2"}
+      ],
+      "default": "background-1"
+    },
+    {
+      "type": "select",
+      "id": "card_style",
+      "label": "Card style",
+      "options": [
+        {"value": "modern", "label": "🔮 Modern (Glassmorphism)"},
+        {"value": "classic", "label": "📰 Classic"},
+        {"value": "minimal", "label": "⚪ Minimal"},
+        {"value": "premium", "label": "💎 Premium"}
+      ],
+      "default": "modern"
+    },
+    {
+      "type": "select",
+      "id": "animation_style",
+      "label": "Animation style",
+      "options": [
+        {"value": "smooth", "label": "🌊 Smooth"},
+        {"value": "bounce", "label": "🏀 Bounce"},
+        {"value": "sharp", "label": "⚡ Sharp"},
+        {"value": "elastic", "label": "🎪 Elastic"}
+      ],
+      "default": "smooth"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full width",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "📱 Responsive Settings"
+    },
+    {
+      "type": "range",
+      "id": "slides_mobile",
+      "label": "Slides visible on mobile",
+      "min": 1,
+      "max": 3,
+      "step": 0.1,
+      "default": 1.2
+    },
+    {
+      "type": "range",
+      "id": "slides_tablet",
+      "label": "Slides visible on tablet",
+      "min": 1,
+      "max": 4,
+      "step": 0.1,
+      "default": 2.5
+    },
+    {
+      "type": "range",
+      "id": "slides_desktop",
+      "label": "Slides visible on desktop",
+      "min": 1,
+      "max": 6,
+      "step": 0.1,
+      "default": 3.5
+    },
+    {
+      "type": "range",
+      "id": "slide_gap_mobile",
+      "label": "Gap between slides (mobile)",
+      "unit": "px",
+      "min": 8,
+      "max": 40,
+      "step": 4,
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "slide_gap_desktop",
+      "label": "Gap between slides (desktop)",
+      "unit": "px",
+      "min": 16,
+      "max": 60,
+      "step": 4,
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "🎬 Animation & Behavior"
+    },
+    {
+      "type": "range",
+      "id": "scroll_speed",
+      "label": "Scroll speed",
+      "unit": "s",
+      "min": 20,
+      "max": 120,
+      "step": 5,
+      "default": 60
+    },
+    {
+      "type": "select",
+      "id": "scroll_direction",
+      "label": "Scroll direction",
+      "options": [
+        {"value": "left", "label": "← Left"},
+        {"value": "right", "label": "→ Right"}
+      ],
+      "default": "left"
+    },
+    {
+      "type": "checkbox",
+      "id": "pause_on_hover",
+      "label": "Pause on hover",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_navigation",
+      "label": "Show navigation controls",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_pagination",
+      "label": "Show pagination dots",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "🎥 Video Reviews"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_video_reviews",
+      "label": "Enable video reviews",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "🖼️ Image Settings"
+    },
+    {
+      "type": "select",
+      "id": "image_aspect_ratio",
+      "label": "Image aspect ratio",
+      "options": [
+        {"value": "auto", "label": "Auto"},
+        {"value": "square", "label": "Square (1:1)"},
+        {"value": "landscape", "label": "Landscape (4:3)"},
+        {"value": "widescreen", "label": "Widescreen (16:9)"},
+        {"value": "portrait", "label": "Portrait (3:4)"}
+      ],
+      "default": "auto"
+    },
+    {
+      "type": "select",
+      "id": "lazy_load_strategy",
+      "label": "Image loading strategy",
+      "options": [
+        {"value": "lazy", "label": "Lazy loading"},
+        {"value": "eager", "label": "Eager loading"},
+        {"value": "intersection", "label": "Intersection observer"}
+      ],
+      "default": "intersection"
+    },
+    {
+      "type": "header",
+      "content": "🔧 Advanced Features"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_schema_markup",
+      "label": "Enable SEO schema markup",
+      "default": true,
+      "info": "Improves search engine visibility"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_analytics",
+      "label": "Enable analytics tracking",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "max_reviews",
+      "label": "Maximum reviews to display",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "default": 50,
+      "info": "Limits for performance optimization"
+    },
+    {
+      "type": "header",
+      "content": "📏 Spacing"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "label": "Top padding",
+      "unit": "px",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "label": "Bottom padding",
+      "unit": "px",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "default": 48
+    },
+    {
+      "type": "header",
+      "content": "🚫 Empty State"
+    },
+    {
+      "type": "text",
+      "id": "empty_state_title",
+      "label": "Empty state title",
+      "default": "No reviews yet"
+    },
+    {
+      "type": "textarea",
+      "id": "empty_state_description",
+      "label": "Empty state description",
+      "default": "Be the first to share your experience with our products."
+    },
+    {
+      "type": "text",
+      "id": "empty_state_button_text",
+      "label": "Empty state button text"
+    },
+    {
+      "type": "url",
+      "id": "empty_state_button_url",
+      "label": "Empty state button URL"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "review",
+      "name": "⭐ Customer Review",
+      "limit": 50,
+      "settings": [
+        {
+          "type": "header",
+          "content": "👤 Customer Information"
+        },
+        {
+          "type": "text",
+          "id": "customer_name",
+          "label": "Customer name",
+          "default": "Sarah Johnson"
+        },
+        {
+          "type": "text",
+          "id": "customer_location",
+          "label": "Customer location",
+          "placeholder": "New York, USA"
+        },
+        {
+          "type": "image_picker",
+          "id": "customer_avatar",
+          "label": "Customer avatar"
+        },
+        {
+          "type": "checkbox",
+          "id": "is_verified",
+          "label": "Verified purchase",
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": "⭐ Review Content"
+        },
+        {
+          "type": "range",
+          "id": "rating",
+          "label": "Star rating",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "default": 5
+        },
+        {
+          "type": "textarea",
+          "id": "review_text",
+          "label": "Review text",
+          "default": "Absolutely love this product! The quality exceeded my expectations and the customer service was outstanding."
+        },
+        {
+          "type": "text",
+          "id": "review_date",
+          "label": "Review date",
+          "placeholder": "2024-01-15",
+          "info": "Format: YYYY-MM-DD"
+        },
+        {
+          "type": "select",
+          "id": "review_platform",
+          "label": "Review platform",
+          "options": [
+            {"value": "Website", "label": "🌐 Website"},
+            {"value": "Google", "label": "🔍 Google"},
+            {"value": "Trustpilot", "label": "⭐ Trustpilot"},
+            {"value": "Facebook", "label": "👥 Facebook"},
+            {"value": "Yelp", "label": "🗣️ Yelp"},
+            {"value": "Amazon", "label": "📦 Amazon"},
+            {"value": "Shopify", "label": "🛍️ Shopify"}
+          ],
+          "default": "Website"
+        },
+        {
+          "type": "header",
+          "content": "🖼️ Product Reference"
+        },
+        {
+          "type": "image_picker",
+          "id": "product_image",
+          "label": "Product image"
+        },
+        {
+          "type": "text",
+          "id": "product_title",
+          "label": "Product title",
+          "placeholder": "Product name"
+        },
+        {
+          "type": "product",
+          "id": "featured_product",
+          "label": "Featured product"
+        },
+        {
+          "type": "header",
+          "content": "🎥 Video Review"
+        },
+        {
+         "type": "url",
+         "id": "video_url",
+         "label": "Video review URL",
+         "info": "YouTube, Vimeo, or direct MP4 link"
+        },
+        {
+          "type": "header",
+          "content": "🔗 Call to Action"
+        },
+        {
+          "type": "text",
+          "id": "cta_text",
+          "label": "CTA button text",
+          "placeholder": "Shop Now"
+        },
+        {
+          "type": "url",
+          "id": "cta_url",
+          "label": "CTA button URL"
+        },
+        {
+          "type": "checkbox",
+          "id": "cta_new_tab",
+          "label": "Open in new tab",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "🌟 Review Carousel",
+      "blocks": [
+        {
+          "type": "review",
+          "settings": {
+            "customer_name": "Sarah Johnson",
+            "customer_location": "New York, USA",
+            "rating": 5,
+            "review_text": "Absolutely love this product! The quality exceeded my expectations and the customer service was outstanding. Will definitely be purchasing again!",
+            "review_platform": "Google",
+            "is_verified": true,
+            "review_date": "2024-08-15"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "customer_name": "Michael Chen",
+            "customer_location": "Toronto, Canada",
+            "rating": 5,
+            "review_text": "Fast shipping, great packaging, and the product is exactly as described. Highly recommended for anyone looking for quality!",
+            "review_platform": "Trustpilot",
+            "is_verified": true,
+            "review_date": "2024-08-12"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "customer_name": "Emma Williams",
+            "customer_location": "London, UK",
+            "rating": 4,
+            "review_text": "Great product with excellent build quality. The only minor issue was the delivery time, but the product itself is fantastic.",
+            "review_platform": "Website",
+            "is_verified": true,
+            "review_date": "2024-08-10"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
