@@ -6,6 +6,8 @@
   Features: Mixed data source, video reviews, advanced animations, accessibility, SEO
 {% endcomment %}
 
+{{ 'review-banner-carousel.css' | asset_url | stylesheet_tag }}
+
 {%- liquid
   # Performance and error handling
   assign section_id = 'rbc-' | append: section.id
@@ -229,7 +231,7 @@
         {%- if section.settings.show_aggregate_rating and total_reviews > 0 -%}
           <div class="rbc-aggregate-rating">
             <div class="rbc-aggregate-stars">
-              {%- render 'rbc-components', type: 'star-rating', rating: average_rating, size: 'large' -%}
+              {%- render 'rbc-components', type: 'star-rating', rating: average_rating, size: 'large', uid: section_id | append: '-avg' -%}
             </div>
             
             <div class="rbc-aggregate-text">
@@ -317,9 +319,9 @@
         data-scroll-speed="{{ scroll_speed }}"
         data-direction="{{ scroll_direction }}"
         data-pause-on-hover="{{ pause_on_hover }}"
-        data-lazy-load="{{ lazy_load_strategy }}"
-        data-enable-drag="true"
-        data-enable-keyboard="true"
+        data-image-strategy="{{ lazy_load_strategy }}"
+        data-drag-enabled="true"
+        data-keyboard-enabled="true"
         data-animation-style="{{ animation_style }}"
         {% if enable_analytics %}data-analytics="true"{% endif %}
         role="region"
@@ -424,7 +426,7 @@
                   
                   <!-- Rating Stars -->
                   <div class="rbc-rating" role="img" aria-label="{{ rating }} out of 5 stars">
-                    {%- render 'rbc-components', type: 'star-rating', rating: rating, size: 'medium' -%}
+                    {%- render 'rbc-components', type: 'star-rating', rating: rating, size: 'medium', uid: review_id -%}
                   </div>
 
                   <!-- Customer Information -->
@@ -550,6 +552,8 @@
 
   </div>
 </section>
+
+{{ 'review-banner-carousel.js' | asset_url | script_tag }}
 
 {%- unless request.design_mode -%}
   {%- comment -%} Initialize carousel in production {%- endcomment -%}
