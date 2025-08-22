@@ -43,6 +43,7 @@
   assign enable_analytics = section.settings.enable_analytics
   assign lazy_load_strategy = section.settings.lazy_load_strategy | default: 'intersection'
   assign image_aspect_ratio = section.settings.image_aspect_ratio | default: 'auto'
+  assign enable_blur_up = section.settings.enable_blur_up
   
   # Filter and limit reviews for performance
   if max_reviews_display > 0
@@ -76,8 +77,8 @@
     --rbc-slides-mobile: {{ slides_mobile }};
     --rbc-slides-tablet: {{ slides_tablet }};
     --rbc-slides-desktop: {{ slides_desktop }};
-    --rbc-slide-gap-mobile: {{ section.settings.slide_gap_mobile | default: 16 }}px;
-    --rbc-slide-gap-desktop: {{ section.settings.slide_gap_desktop | default: 24 }}px;
+    --rbc-gap-mobile: {{ section.settings.slide_gap_mobile | default: 16 }}px;
+    --rbc-gap: {{ section.settings.slide_gap_desktop | default: 24 }}px;
     
     /* Color scheme integration */
     --rbc-bg-primary: rgb(var(--color-{{ color_scheme }}-background));
@@ -393,8 +394,9 @@
                           loading: image_loading,
                           sizes: '(max-width: 749px) 90vw, (max-width: 989px) 45vw, 33vw',
                           class: 'rbc-image',
-                          aspect_ratio: image_aspect_ratio
-                        -%}
+                          aspect_ratio: image_aspect_ratio,
+                          blur_up: enable_blur_up
+                          -%}
                       {%- endif -%}
                     </div>
                     {%- if product_title != blank and product_image != blank and has_video == false -%}
@@ -794,6 +796,12 @@
         {"value": "intersection", "label": "Intersection observer"}
       ],
       "default": "intersection"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_blur_up",
+      "label": "Enable blur-up placeholder",
+      "default": false
     },
     {
       "type": "header",
