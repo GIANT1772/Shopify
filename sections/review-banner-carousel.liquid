@@ -80,6 +80,8 @@
     --rbc-slides-desktop: {{ slides_desktop }};
     --rbc-gap-mobile: {{ section.settings.slide_gap_mobile | default: 16 }}px;
     --rbc-gap: {{ section.settings.slide_gap_desktop | default: 24 }}px;
+    --rbc-card-width: {{ section.settings.card_width | default: 360 }}px;
+    --rbc-card-height: {{ section.settings.card_height | default: 520 }}px;
     
     /* Color scheme integration */
     --rbc-bg-primary: rgb(var(--color-{{ color_scheme }}-background));
