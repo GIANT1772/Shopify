@@ -313,6 +313,7 @@
         slide.setAttribute('aria-setsize', this.state.slides.length);
         slide.setAttribute('aria-posinset', index + 1);
         slide.setAttribute('tabindex', index === 0 ? '0' : '-1');
+        slide.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
       });
     }
 
@@ -438,12 +439,15 @@
     }
 
     setupControls() {
-      const controls = this.element.parentElement?.querySelector('.rbc-controls');
-      if (!controls) return;
+      const parent = this.element.parentElement;
+      if (!parent) return;
 
-      const prevBtn = controls.querySelector('[data-rbc-control="prev"]');
-      const nextBtn = controls.querySelector('[data-rbc-control="next"]');
-      const playPauseBtn = controls.querySelector('[data-rbc-control="play-pause"]');
+      const controls = parent.querySelector('.rbc-controls');
+      const pagination = parent.querySelector('.rbc-pagination');
+
+      const prevBtn = controls?.querySelector('[data-rbc-control="prev"]');
+      const nextBtn = controls?.querySelector('[data-rbc-control="next"]');
+      const playPauseBtn = controls?.querySelector('[data-rbc-control="play-pause"]');
 
       if (prevBtn) {
         prevBtn.addEventListener('click', () => this.navigateTo('prev'));
@@ -462,6 +466,16 @@
           }
         });
       }
+
+      this.paginationDots = [];
+      if (pagination) {
+        this.paginationDots = Array.from(pagination.querySelectorAll('.rbc-pagination-dot'));
+        this.paginationDots.forEach((dot, index) => {
+          dot.addEventListener('click', () => this.navigateTo(index));
+        });
+      }
+
+      this.updatePagination();
     }
 
     setupObservers() {
@@ -716,17 +730,22 @@
         this.state.currentSlideIndex = targetIndex;
         this.focusSlide(targetIndex);
         this.announceSlide(targetIndex);
+        this.updatePagination();
       }
     }
 
     focusSlide(index) {
-      // Remove tabindex from all slides
-      this.state.slides.forEach(slide => slide.setAttribute('tabindex', '-1'));
-      
+      // Remove tabindex and selection from all slides
+      this.state.slides.forEach(slide => {
+        slide.setAttribute('tabindex', '-1');
+        slide.setAttribute('aria-selected', 'false');
+      });
+
       // Set focus on target slide
       const targetSlide = this.state.slides[index];
       if (targetSlide) {
         targetSlide.setAttribute('tabindex', '0');
+        targetSlide.setAttribute('aria-selected', 'true');
         targetSlide.focus();
       }
     }
@@ -745,9 +764,19 @@
       announcer.setAttribute('aria-atomic', 'true');
       announcer.className = 'rbc-sr-only';
       announcer.textContent = message;
-      
+
       document.body.appendChild(announcer);
       setTimeout(() => announcer.remove(), 1000);
+    }
+
+    updatePagination() {
+      if (!this.paginationDots || !this.paginationDots.length) return;
+
+      this.paginationDots.forEach((dot, index) => {
+        const isActive = index === this.state.currentSlideIndex;
+        dot.classList.toggle('is-active', isActive);
+        dot.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
     }
 
     handleResize() {
