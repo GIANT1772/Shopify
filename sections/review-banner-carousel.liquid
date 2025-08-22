@@ -6,6 +6,8 @@
   Features: Mixed data source, video reviews, advanced animations, accessibility, SEO
 {% endcomment %}
 
+{{ 'review-banner-carousel.css' | asset_url | stylesheet_tag }}
+
 {%- liquid
   # Performance and error handling
   assign section_id = 'rbc-' | append: section.id
@@ -550,6 +552,8 @@
 
   </div>
 </section>
+
+{{ 'review-banner-carousel.js' | asset_url | script_tag }}
 
 {%- unless request.design_mode -%}
   {%- comment -%} Initialize carousel in production {%- endcomment -%}
