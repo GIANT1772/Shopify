@@ -152,7 +152,7 @@
 /* Premium Card Design */
 .rbc-slide {
   flex: 0 0 auto;
-  width: var(--rbc-slide-w-mobile, 34rem);
+  width: var(--rbc-card-width, 34rem);
   background: rgb(var(--color-background));
   border-radius: var(--rbc-border-radius);
   overflow: hidden;
@@ -162,22 +162,22 @@
   border: 1px solid rgba(var(--color-foreground), 0.1);
   display: flex;
   flex-direction: column;
-  min-height: 48rem;
+  height: var(--rbc-card-height, 48rem);
   cursor: pointer;
   transform: translateZ(0);
 }
 
 @media screen and (min-width: 750px) {
   .rbc-slide {
-    width: var(--rbc-slide-w-tablet, 40rem);
-    min-height: 52rem;
+    width: var(--rbc-card-width, 40rem);
+    height: var(--rbc-card-height, 52rem);
   }
 }
 
 @media screen and (min-width: 990px) {
   .rbc-slide {
-    width: var(--rbc-slide-w-desktop, 44rem);
-    min-height: 56rem;
+    width: var(--rbc-card-width, 44rem);
+    height: var(--rbc-card-height, 56rem);
   }
 }
 
@@ -600,8 +600,8 @@
 
 .rbc-loading-slide {
   flex: 0 0 auto;
-  width: var(--rbc-slide-w-mobile, 34rem);
-  height: 48rem;
+  width: var(--rbc-card-width, 34rem);
+  height: var(--rbc-card-height, 48rem);
   background: linear-gradient(
     90deg,
     rgba(var(--color-foreground), 0.06) 25%,
