@@ -304,6 +304,7 @@
       
       this.state.slides = Array.from(this.originalContent.children);
       this.updateSlideAttributes();
+      this.setupReadMoreButtons();
     }
 
     updateSlideAttributes() {
@@ -312,6 +313,33 @@
         slide.setAttribute('aria-setsize', this.state.slides.length);
         slide.setAttribute('aria-posinset', index + 1);
         slide.setAttribute('tabindex', index === 0 ? '0' : '-1');
+      });
+    }
+
+    setupReadMoreButtons() {
+      this.state.slides.forEach(slide => {
+        const textEl = slide.querySelector('.rbc-review-text');
+        if (!textEl) return;
+
+        const existingButton = slide.querySelector('.rbc-read-more');
+        if (existingButton) existingButton.remove();
+        textEl.classList.remove('is-expanded');
+
+        if (textEl.scrollHeight > textEl.clientHeight + 1) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'rbc-read-more';
+          btn.setAttribute('aria-expanded', 'false');
+          btn.textContent = 'Read more';
+
+          btn.addEventListener('click', () => {
+            const expanded = textEl.classList.toggle('is-expanded');
+            btn.textContent = expanded ? 'Read less' : 'Read more';
+            btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+          });
+
+          textEl.after(btn);
+        }
       });
     }
 
