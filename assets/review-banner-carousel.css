@@ -91,6 +91,14 @@
   mask-image: var(--rbc-gradient-mask);
   -webkit-mask-image: var(--rbc-gradient-mask);
 }
+.rbc-section:not(.rbc-full-width) .rbc-carousel-wrapper {
+  width: 100%;
+  margin-left: 0;
+  transform: none;
+  mask-image: none;
+  -webkit-mask-image: none;
+}
+
 
 .rbc-carousel-track {
   display: flex;
@@ -151,11 +159,24 @@
 
 /* Premium Card Design */
 .rbc-slide {
-  flex: 0 0 auto;
+  flex: 0 0 calc((100% - (var(--rbc-slides-mobile) - 1) * var(--rbc-gap-mobile)) / var(--rbc-slides-mobile));
+}
+@media screen and (min-width: 750px) {
+  .rbc-slide {
+    flex: 0 0 calc((100% - (var(--rbc-slides-tablet) - 1) * var(--rbc-gap)) / var(--rbc-slides-tablet));
+  }
 }
 
+@media screen and (min-width: 990px) {
+  .rbc-slide {
+    flex: 0 0 calc((100% - (var(--rbc-slides-desktop) - 1) * var(--rbc-gap)) / var(--rbc-slides-desktop));
+  }
+}
+
+
+
 .rbc-card {
-  width: clamp(280px, 32vw, 360px);
+  width: 100%;
   height: auto;
   background: rgb(var(--color-background));
   border-radius: var(--rbc-border-radius);
