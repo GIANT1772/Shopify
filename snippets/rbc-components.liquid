@@ -1,0 +1,653 @@
+{% comment %}
+  Advanced Review Banner Carousel - Component Snippets
+  Version: 3.0.0
+  
+  Usage: {% render 'rbc-components', type: 'component-name', param1: value1 %}
+  
+  Components included:
+  - star-rating
+  - verified-icon
+  - platform-icon
+  - responsive-image
+  - video-player
+{% endcomment %}
+
+{%- liquid
+  assign component_type = type | default: 'star-rating'
+  assign rating_value = rating | default: 5
+  assign rating_size = size | default: 'medium'
+  assign rating_color = color | default: 'gold'
+  assign show_text = show_text | default: false
+  assign is_interactive = interactive | default: false
+-%}
+
+{%- case component_type -%}
+  
+  {%- when 'star-rating' -%}
+    {%- liquid
+      case rating_size
+        when 'small'
+          assign star_size = '14px'
+        when 'medium'
+          assign star_size = '18px'
+        when 'large'
+          assign star_size = '24px'
+        when 'xl'
+          assign star_size = '32px'
+      endcase
+      
+      assign full_stars = rating_value | floor
+      assign has_half_star = rating_value | modulo: 1
+      if has_half_star >= 0.5
+        assign has_half_star = 1
+      else
+        assign has_half_star = 0
+      endif
+      assign empty_stars = 5 | minus: full_stars | minus: has_half_star
+    -%}
+
+    <div class="rbc-star-rating rbc-star-rating--{{ rating_size }} rbc-star-rating--{{ rating_color }}" 
+         style="--star-size: {{ star_size }};" 
+         data-rating="{{ rating_value }}"
+         {% if is_interactive %}data-interactive="true"{% endif %}>
+      
+      {%- for i in (1..full_stars) -%}
+        <span class="rbc-star rbc-star--filled" 
+              {% if is_interactive %}role="button" tabindex="0" data-rating="{{ i }}"{% endif %}>
+          <svg viewBox="0 0 24 24" fill="currentColor" role="img" aria-hidden="true">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        </span>
+      {%- endfor -%}
+      
+      {%- if has_half_star == 1 -%}
+        <span class="rbc-star rbc-star--half" 
+              {% if is_interactive %}role="button" tabindex="0" data-rating="{{ full_stars | plus: 1 }}"{% endif %}>
+          <svg viewBox="0 0 24 24" role="img" aria-hidden="true">
+            <defs>
+              <linearGradient id="half-{{ section.id }}-{{ forloop.index }}">
+                <stop offset="50%" stop-color="currentColor"/>
+                <stop offset="50%" stop-color="rgba(0,0,0,0.2)"/>
+              </linearGradient>
+            </defs>
+            <path fill="url(#half-{{ section.id }}-{{ forloop.index }})" 
+                  d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        </span>
+      {%- endif -%}
+      
+      {%- for i in (1..empty_stars) -%}
+        <span class="rbc-star rbc-star--empty" 
+              {% if is_interactive %}role="button" tabindex="0" data-rating="{{ full_stars | plus: has_half_star | plus: i }}"{% endif %}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" role="img" aria-hidden="true">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        </span>
+      {%- endfor -%}
+      
+      {%- if show_text -%}
+        <span class="rbc-rating-text">{{ rating_value }} out of 5 stars</span>
+      {%- endif -%}
+    </div>
+
+  {%- when 'verified-icon' -%}
+    {%- liquid
+      assign badge_style = style | default: 'premium'
+      assign badge_size = size | default: 'medium'
+      assign platform = platform | default: 'website'
+      
+      case badge_size
+        when 'small'
+          assign icon_size = '16px'
+        when 'medium'
+          assign icon_size = '20px'
+        when 'large'
+          assign icon_size = '24px'
+      endcase
+    -%}
+
+    <span class="rbc-verified-badge rbc-verified-badge--{{ badge_style }} rbc-verified-badge--{{ platform }}" 
+          style="--icon-size: {{ icon_size }};"
+          title="Verified {{ platform | capitalize }} Purchase"
+          aria-label="Verified purchase">
+      
+      <svg viewBox="0 0 24 24" fill="none" class="rbc-verified-icon">
+        <circle cx="12" cy="12" r="10" fill="#10b981"/>
+        <path d="M9 12l2 2 4-4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </span>
+
+  {%- when 'platform-icon' -%}
+    {%- assign platform_name = platform | downcase | default: 'website' -%}
+
+    <span class="rbc-platform-icon rbc-platform-icon--{{ platform_name }}" aria-hidden="true">
+      {% case platform_name %}
+        {% when 'google' %}
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+        {% when 'trustpilot' %}
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L14.09 8.26L22 9L16 14.74L17.18 22.02L12 19L6.82 22.02L8 14.74L2 9L9.91 8.26L12 2Z" fill="#00B67A"/>
+          </svg>
+        {% when 'facebook' %}
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/>
+          </svg>
+        {% when 'yelp' %}
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12.271 16.718v1.417q0 .69-.3 1.014-.3.33-.893.33-.54 0-.893-.3-.346-.3-.346-.84 0-.3.12-.69l1.65-5.01q.12-.36.3-.54.18-.18.54-.18.3 0 .54.18.24.18.36.54z" fill="#FF1A1A"/>
+          </svg>
+        {% when 'amazon' %}
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M.045 18.02c.072-.116.187-.18.34-.18.058 0 .12.006.18.023.062.016.122.035.18.057 1.006.414 2.24.808 3.71 1.17 1.468.36 3.058.54 4.77.54 1.827 0 3.567-.24 5.22-.72 1.656-.48 3.12-1.14 4.402-1.98.136-.097.237-.14.312-.14.178 0 .275.118.275.36 0 .12-.04.24-.12.36-.632.705-1.466 1.31-2.51 1.83-1.043.52-2.17.95-3.38 1.29-1.21.34-2.43.51-3.67.51-1.83 0-3.57-.24-5.22-.72-1.65-.48-3.06-1.14-4.23-1.98-.116-.078-.174-.173-.174-.283 0-.078.028-.15.085-.214z" fill="#FF9900"/>
+          </svg>
+        {% when 'shopify' %}
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M15.337 2.044c-.203-.018-.37-.03-.508-.03-.812 0-1.605.33-2.347 1.044-.623.6-1.14 1.403-1.504 2.35-.353-.102-.72-.15-1.074-.15-2.108 0-3.815 1.784-3.815 3.99 0 .424.075.83.203 1.2l-1.864 5.79c-.12.375-.075.78.12 1.125.197.345.525.57.9.63l8.79 1.35c.068.01.135.015.203.015.3 0 .585-.12.795-.33.24-.24.36-.57.33-.9l-.435-4.95c.675-.12 1.29-.435 1.785-.915.765-.735 1.17-1.77 1.17-2.88 0-.54-.105-1.065-.3-1.545.36-.615.54-1.29.54-1.98 0-1.635-.975-3.12-2.49-3.795-.203-.09-.42-.165-.645-.225zm-1.62 4.65c0 .54-.21 1.05-.585 1.425-.375.375-.885.585-1.425.585s-1.05-.21-1.425-.585c-.375-.375-.585-.885-.585-1.425s.21-1.05.585-1.425c.375-.375.885-.585 1.425-.585s1.05.21 1.425.585c.375.375.585.885.585 1.425z" fill="#95BF47"/>
+          </svg>
+        {% else %}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <polyline points="7.5 4.21 12 6.81 16.5 4.21"/>
+            <polyline points="7.5 19.79 7.5 14.6 3 12"/>
+            <polyline points="21 12 16.5 14.6 16.5 19.79"/>
+          </svg>
+      {% endcase %}
+    </span>
+
+  {%- when 'responsive-image' -%}
+    {%- liquid
+      assign img = image
+      assign img_alt = alt | default: img.alt | default: ''
+      assign img_loading = loading | default: 'lazy'
+      assign img_sizes = sizes | default: '(max-width: 749px) 100vw, 50vw'
+      assign img_class = class | default: 'rbc-image'
+      assign blur_up = blur_up | default: false
+      assign img_aspect_ratio = aspect_ratio | default: 'auto'
+      
+      if img != blank
+        assign img_url_mobile = img | image_url: width: 400
+        assign img_url_tablet = img | image_url: width: 800
+        assign img_url_desktop = img | image_url: width: 1200
+        assign img_url_retina = img | image_url: width: 1600
+        
+        if blur_up
+          assign blur_url = img | image_url: width: 40
+        endif
+      endif
+    -%}
+
+    {%- if img != blank -%}
+      <div class="rbc-image-container" data-aspect="{{ img_aspect_ratio }}">
+        {%- if blur_up -%}
+          <img 
+            class="rbc-image-blur" 
+            src="{{ blur_url }}"
+            alt=""
+            aria-hidden="true"
+            loading="eager"
+          >
+        {%- endif -%}
+        
+        <img 
+          class="{{ img_class }}"
+          src="{{ img_url_mobile }}"
+          srcset="{{ img_url_mobile }} 400w,
+                  {{ img_url_tablet }} 800w,
+                  {{ img_url_desktop }} 1200w,
+                  {{ img_url_retina }} 1600w"
+          sizes="{{ img_sizes }}"
+          alt="{{ img_alt }}"
+          loading="{{ img_loading }}"
+          width="{{ img.width }}"
+          height="{{ img.height }}"
+          {% if img_loading == 'lazy' %}data-src="{{ img_url_desktop }}"{% endif %}
+        >
+      </div>
+    {%- else -%}
+      <div class="rbc-image-placeholder" data-aspect="{{ img_aspect_ratio }}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21,15 16,10 5,21"/>
+        </svg>
+      </div>
+    {%- endif -%}
+
+  {%- when 'video-player' -%}
+    {%- liquid
+      assign video_id = 'video-' | append: review_id | default: 'default'
+      assign video_type = 'mp4'
+      
+      if video_url contains 'youtube.com' or video_url contains 'youtu.be'
+        assign video_type = 'youtube'
+        if video_url contains 'youtu.be'
+          assign youtube_id = video_url | split: '/' | last | split: '?' | first
+        else
+          assign youtube_id = video_url | split: 'v=' | last | split: '&' | first
+        endif
+      elsif video_url contains 'vimeo.com'
+        assign video_type = 'vimeo'
+        assign vimeo_id = video_url | split: '/' | last | split: '?' | first
+      endif
+    -%}
+
+    <div class="rbc-video-player" data-video-type="{{ video_type }}" data-video-id="{{ video_id }}">
+      {% case video_type %}
+        {% when 'youtube' %}
+          <div class="rbc-video-embed" data-youtube-id="{{ youtube_id }}">
+            {%- if poster != blank -%}
+              {{ poster | image_url: width: 800 | image_tag: 
+                  class: 'rbc-video-poster',
+                  loading: 'lazy',
+                  alt: 'Video review thumbnail'
+              }}
+            {%- else -%}
+              <img 
+                class="rbc-video-poster" 
+                src="https://img.youtube.com/vi/{{ youtube_id }}/maxresdefault.jpg"
+                alt="Video review thumbnail"
+                loading="lazy"
+              >
+            {%- endif -%}
+            
+            <iframe 
+              class="rbc-video-iframe"
+              data-src="https://www.youtube.com/embed/{{ youtube_id }}?autoplay=1&rel=0&modestbranding=1"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+              loading="lazy"
+              style="display: none;"
+            ></iframe>
+          </div>
+          
+        {% when 'vimeo' %}
+          <div class="rbc-video-embed" data-vimeo-id="{{ vimeo_id }}">
+            {%- if poster != blank -%}
+              {{ poster | image_url: width: 800 | image_tag: 
+                  class: 'rbc-video-poster',
+                  loading: 'lazy',
+                  alt: 'Video review thumbnail'
+              }}
+            {%- endif -%}
+            
+            <iframe 
+              class="rbc-video-iframe"
+              data-src="https://player.vimeo.com/video/{{ vimeo_id }}?autoplay=1"
+              frameborder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen
+              loading="lazy"
+              style="display: none;"
+            ></iframe>
+          </div>
+          
+        {% when 'mp4' %}
+          <video 
+            class="rbc-video-native"
+            {% if poster != blank %}poster="{{ poster | image_url: width: 800 }}"{% endif %}
+            controls
+            preload="metadata"
+            playsinline
+          >
+            <source src="{{ video_url }}" type="video/mp4">
+            <p>Your browser doesn't support video playback.</p>
+          </video>
+      {% endcase %}
+    </div>
+
+{%- endcase -%}
+
+{%- comment -%} Component Styles {%- endcomment -%}
+<style>
+  /* Star Rating Styles */
+  .rbc-star-rating {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 0;
+  }
+  
+  .rbc-star {
+    display: inline-flex;
+    color: #e5e7eb;
+    width: var(--star-size, 18px);
+    height: var(--star-size, 18px);
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  
+  .rbc-star--filled {
+    color: #f59e0b;
+    filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.3));
+  }
+  
+  .rbc-star--half {
+    color: #f59e0b;
+  }
+  
+  .rbc-star svg {
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* Interactive star rating */
+  .rbc-star-rating[data-interactive="true"] .rbc-star {
+    cursor: pointer;
+  }
+  
+  .rbc-star-rating[data-interactive="true"] .rbc-star:hover {
+    transform: scale(1.1);
+  }
+  
+  .rbc-rating-text {
+    margin-left: 8px;
+    font-size: 0.875rem;
+    color: rgba(var(--color-foreground), 0.7);
+  }
+
+  /* Verified Badge Styles */
+  .rbc-verified-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--icon-size, 20px);
+    height: var(--icon-size, 20px);
+    border-radius: 50%;
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    animation: pulse-glow 2s infinite;
+    position: relative;
+  }
+  
+  .rbc-verified-badge::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, #10b981, #059669);
+    opacity: 0.3;
+    z-index: -1;
+    animation: rotate-glow 3s linear infinite;
+  }
+  
+  .rbc-verified-badge--premium {
+    background: linear-gradient(135deg, #10b981, #059669, #10b981);
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease infinite, pulse-glow 2s infinite;
+  }
+  
+  .rbc-verified-icon {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  }
+  
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); }
+    50% { box-shadow: 0 4px 16px rgba(16, 185, 129, 0.5), 0 0 0 4px rgba(16, 185, 129, 0.1); }
+  }
+  
+  @keyframes rotate-glow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  @keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* Platform Icon Styles */
+  .rbc-platform-icon {
+    display: inline-flex;
+    width: 16px;
+    height: 16px;
+    opacity: 0.8;
+  }
+  
+  .rbc-platform-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Image Container Styles */
+  .rbc-image-container {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  }
+  
+  .rbc-image-blur {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(20px);
+    transform: scale(1.1);
+    transition: opacity 0.6s ease;
+    z-index: 1;
+  }
+  
+  .rbc-image-blur.hidden {
+    opacity: 0;
+  }
+  
+  .rbc-image {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 2;
+    transition: transform 0.4s ease;
+  }
+  
+  .rbc-image-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    color: rgba(0, 0, 0, 0.3);
+  }
+  
+  .rbc-image-placeholder svg {
+    width: 48px;
+    height: 48px;
+  }
+
+  /* Video Player Styles */
+  .rbc-video-player {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    border-radius: inherit;
+    overflow: hidden;
+  }
+  
+  .rbc-video-embed {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .rbc-video-poster {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+  }
+  
+  .rbc-video-iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .rbc-video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.3);
+    opacity: 1;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+  
+  .rbc-video-player.is-playing .rbc-video-overlay {
+    opacity: 0;
+  }
+  
+  .rbc-video-play-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    color: #000;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    pointer-events: all;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  }
+  
+  .rbc-video-play-btn:hover {
+    transform: scale(1.1);
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+  
+  .rbc-video-play-btn svg {
+    width: 24px;
+    height: 24px;
+    margin-left: 2px;
+  }
+
+  .rbc-video-native {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Media Queries for Components */
+  @media screen and (max-width: 749px) {
+    .rbc-video-play-btn {
+      width: 48px;
+      height: 48px;
+    }
+    
+    .rbc-video-play-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+  
+  /* Dark mode adjustments */
+  @media (prefers-color-scheme: dark) {
+    .rbc-image-placeholder,
+    .rbc-image-container {
+      background: linear-gradient(135deg, #1f2937, #374151);
+    }
+  }
+  
+  /* High contrast mode */
+  @media (prefers-contrast: high) {
+    .rbc-verified-badge {
+      border: 2px solid currentColor;
+    }
+    
+    .rbc-star--filled {
+      color: currentColor;
+    }
+  }
+  
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .rbc-verified-badge,
+    .rbc-verified-badge::before {
+      animation: none !important;
+    }
+    
+    .rbc-star,
+    .rbc-image,
+    .rbc-video-play-btn {
+      transition: none !important;
+    }
+  }
+</style>
+
+{%- comment -%} JavaScript for Video Functionality {%- endcomment -%}
+<script>
+  // Video player functionality
+  document.addEventListener('click', function(e) {
+    const playBtn = e.target.closest('.rbc-video-play-btn');
+    if (!playBtn) return;
+    
+    e.preventDefault();
+    const videoPlayer = playBtn.closest('.rbc-video-player');
+    const videoEmbed = videoPlayer.querySelector('.rbc-video-embed');
+    const iframe = videoPlayer.querySelector('.rbc-video-iframe');
+    const poster = videoPlayer.querySelector('.rbc-video-poster');
+    
+    if (iframe && iframe.dataset.src) {
+      iframe.src = iframe.dataset.src;
+      iframe.style.display = 'block';
+      if (poster) poster.style.display = 'none';
+      videoPlayer.classList.add('is-playing');
+      
+      // Analytics
+      if (typeof window.gtag !== 'undefined') {
+        try {
+          gtag('event', 'video_play', {
+            event_category: 'engagement',
+            event_label: 'review_video'
+          });
+        } catch (e) {
+          console.warn('Analytics tracking failed:', e);
+        }
+      }
+    }
+  });
+  
+  // Intersection Observer for video lazy loading
+  if ('IntersectionObserver' in window) {
+    const videoObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const videoPlayer = entry.target;
+          const iframe = videoPlayer.querySelector('.rbc-video-iframe[data-src]');
+          if (iframe && !iframe.src) {
+            // Preload video metadata when in viewport
+            const tempIframe = document.createElement('iframe');
+            tempIframe.src = iframe.dataset.src.replace('autoplay=1', 'autoplay=0');
+            tempIframe.style.display = 'none';
+            document.body.appendChild(tempIframe);
+            setTimeout(() => tempIframe.remove(), 1000);
+          }
+          videoObserver.unobserve(videoPlayer);
+        }
+      });
+    }, { threshold: 0.5 });
+    
+    document.querySelectorAll('.rbc-video-player').forEach(player => {
+      videoObserver.observe(player);
+    });
+  }
+</script>
