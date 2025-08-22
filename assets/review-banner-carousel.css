@@ -167,7 +167,7 @@
 .rbc-card {
   width: var(--rbc-card-width);
   max-width: 100%;
-  height: var(--rbc-card-height);
+  min-height: var(--rbc-card-height);
   background: rgb(var(--color-background));
   border-radius: var(--rbc-border-radius);
   overflow: hidden;
@@ -223,7 +223,7 @@
 /* Aspect Ratio System */
 .rbc-image-wrapper[data-aspect="auto"],
 .rbc-image-placeholder[data-aspect="auto"] {
-  height: 26rem;
+  aspect-ratio: 4 / 3;
 }
 
 .rbc-image-wrapper[data-aspect="square"],
@@ -246,19 +246,7 @@
   aspect-ratio: 3 / 4;
 }
 
-@media screen and (min-width: 750px) {
-  .rbc-image-wrapper[data-aspect="auto"],
-  .rbc-image-placeholder[data-aspect="auto"] {
-    height: 28rem;
-  }
-}
 
-@media screen and (min-width: 990px) {
-  .rbc-image-wrapper[data-aspect="auto"],
-  .rbc-image-placeholder[data-aspect="auto"] {
-    height: 30rem;
-  }
-}
 
 /* Advanced Image Loading */
 .rbc-image {
