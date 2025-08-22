@@ -452,9 +452,11 @@
 
                   <!-- Review Text -->
                   {%- if review_text != blank -%}
-                    <blockquote class="rbc-review-text">
-                      {{ review_text }}
-                    </blockquote>
+                    <div class="rbc-quote">
+                      <blockquote class="rbc-review-text">
+                        {{ review_text }}
+                      </blockquote>
+                    </div>
                   {%- endif -%}
 
                   <!-- Review Metadata -->
