@@ -78,8 +78,6 @@
     --rbc-slides-desktop: {{ slides_desktop }};
     --rbc-slide-gap-mobile: {{ section.settings.slide_gap_mobile | default: 16 }}px;
     --rbc-slide-gap-desktop: {{ section.settings.slide_gap_desktop | default: 24 }}px;
-    --rbc-card-width: {{ section.settings.card_width | default: 360 | divided_by: 10.0 | append: 'rem' }};
-    --rbc-card-height: {{ section.settings.card_height | default: 520 | divided_by: 10.0 | append: 'rem' }};
     
     /* Color scheme integration */
     --rbc-bg-primary: rgb(var(--color-{{ color_scheme }}-background));
@@ -346,7 +344,7 @@
                 endif
               -%}
               
-              <article 
+              <article
                 class="rbc-slide rbc-slide--{{ card_style }}"
                 data-block-id="{{ block.id }}"
                 data-rating="{{ rating }}"
@@ -358,53 +356,55 @@
                 tabindex="-1"
                 {{ block.shopify_attributes }}
               >
-                
-                <div class="rbc-image-wrapper" data-aspect="{{ image_aspect_ratio }}">
-                  {%- if has_video -%}
-                    <!-- Video Review -->
-                    <div class="rbc-video-container">
-                      {%- render 'rbc-components',
-                        type: 'video-player',
-                        video_url: video_url,
-                        poster: product_image,
-                        review_id: review_id
-                      -%}
-                      <div class="rbc-video-overlay">
-                        <button class="rbc-video-play-btn" aria-label="Play review video">
-                          <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M8 5v14l11-7z"/>
-                          </svg>
-                        </button>
-                      </div>
+
+                <div class="rbc-card">
+                  <div class="rbc-image-wrapper" data-aspect="{{ image_aspect_ratio }}">
+                    <div class="rbc-media">
+                      {%- if has_video -%}
+                        <!-- Video Review -->
+                        <div class="rbc-video-container">
+                          {%- render 'rbc-components',
+                            type: 'video-player',
+                            video_url: video_url,
+                            poster: product_image,
+                            review_id: review_id
+                          -%}
+                          <div class="rbc-video-overlay">
+                            <button class="rbc-video-play-btn" aria-label="Play review video">
+                              <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M8 5v14l11-7z"/>
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      {%- elsif product_image != blank -%}
+                        <!-- Product Image -->
+                        {%- liquid
+                          assign image_loading = 'lazy'
+                          if forloop.index <= 3
+                            assign image_loading = 'eager'
+                          endif
+                        -%}
+
+                        {%- render 'rbc-components',
+                          type: 'responsive-image',
+                          image: product_image,
+                          alt: product_title | default: customer_name | append: ' review',
+                          loading: image_loading,
+                          sizes: '(max-width: 749px) 90vw, (max-width: 989px) 45vw, 33vw',
+                          class: 'rbc-image',
+                          aspect_ratio: image_aspect_ratio
+                        -%}
+                      {%- endif -%}
                     </div>
-                  {%- elsif product_image != blank -%}
-                    <!-- Product Image -->
-                    {%- liquid
-                      assign image_loading = 'lazy'
-                      if forloop.index <= 3
-                        assign image_loading = 'eager'
-                      endif
-                    -%}
-
-                    {%- render 'rbc-components',
-                      type: 'responsive-image',
-                      image: product_image,
-                      alt: product_title | default: customer_name | append: ' review',
-                      loading: image_loading,
-                      sizes: '(max-width: 749px) 90vw, (max-width: 989px) 45vw, 33vw',
-                      class: 'rbc-image',
-                      aspect_ratio: image_aspect_ratio
-                    -%}
-
-                    {%- if product_title != blank -%}
+                    {%- if product_title != blank and product_image != blank and has_video == false -%}
                       <div class="rbc-product-badge">
                         {{ product_title }}
                       </div>
                     {%- endif -%}
-                  {%- endif -%}
-                </div>
+                  </div>
 
-                <div class="rbc-content">
+                  <div class="rbc-content">
                   
                   <!-- Rating Stars -->
                   <div class="rbc-rating" role="img" aria-label="{{ rating }} out of 5 stars">
@@ -496,8 +496,9 @@
                       <span class="rbc-cta-icon">→</span>
                     </a>
                   {%- endif -%}
-                  
+
                 </div>
+              </div>
               </article>
               
             {%- endfor -%}

@@ -152,7 +152,11 @@
 /* Premium Card Design */
 .rbc-slide {
   flex: 0 0 auto;
-  width: var(--rbc-card-width, 34rem);
+}
+
+.rbc-card {
+  width: clamp(280px, 32vw, 360px);
+  height: auto;
   background: rgb(var(--color-background));
   border-radius: var(--rbc-border-radius);
   overflow: hidden;
@@ -162,40 +166,25 @@
   border: 1px solid rgba(var(--color-foreground), 0.1);
   display: flex;
   flex-direction: column;
-  height: var(--rbc-card-height, 48rem);
   cursor: pointer;
   transform: translateZ(0);
 }
 
-@media screen and (min-width: 750px) {
-  .rbc-slide {
-    width: var(--rbc-card-width, 40rem);
-    height: var(--rbc-card-height, 52rem);
-  }
-}
-
-@media screen and (min-width: 990px) {
-  .rbc-slide {
-    width: var(--rbc-card-width, 44rem);
-    height: var(--rbc-card-height, 56rem);
-  }
-}
-
-.rbc-slide:hover {
+.rbc-card:hover {
   transform: translateY(-1.2rem) scale(1.02);
   box-shadow: var(--rbc-card-shadow-hover);
   border-color: rgba(var(--color-foreground), 0.2);
 }
 
-.rbc-slide::before {
+.rbc-card::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 0.4rem;
-  background: linear-gradient(90deg, 
-    rgb(var(--color-base-accent-1)), 
+  background: linear-gradient(90deg,
+    rgb(var(--color-base-accent-1)),
     rgb(var(--color-base-accent-2))
   );
   z-index: 1;
@@ -207,11 +196,17 @@
   position: relative;
   width: 100%;
   overflow: hidden;
-  background: linear-gradient(135deg, 
-    rgb(var(--color-background)), 
+  background: linear-gradient(135deg,
+    rgb(var(--color-background)),
     rgba(var(--color-background), 0.8)
   );
   flex-shrink: 0;
+}
+
+.rbc-media {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  width: 100%;
 }
 
 /* Aspect Ratio System */
@@ -272,7 +267,7 @@
   filter: brightness(1) saturate(1);
 }
 
-.rbc-slide:hover .rbc-image {
+.rbc-card:hover .rbc-image {
   transform: scale(1.08);
   filter: brightness(1.05) saturate(1.1);
 }
@@ -600,8 +595,8 @@
 
 .rbc-loading-slide {
   flex: 0 0 auto;
-  width: var(--rbc-card-width, 34rem);
-  height: var(--rbc-card-height, 48rem);
+  width: clamp(280px, 32vw, 360px);
+  height: auto;
   background: linear-gradient(
     90deg,
     rgba(var(--color-foreground), 0.06) 25%,
@@ -806,7 +801,7 @@
 }
 
 /* Focus Management */
-.rbc-slide:focus-within {
+.rbc-card:focus-within {
   outline: 3px solid rgb(var(--color-base-accent-1));
   outline-offset: 0.4rem;
   z-index: 10;
@@ -819,7 +814,7 @@
 
 /* High Contrast Support */
 @media (prefers-contrast: high) {
-  .rbc-slide {
+  .rbc-card {
     border: 2px solid currentColor;
   }
   
@@ -843,7 +838,7 @@
 
 /* Performance Optimizations */
 .rbc-carousel-track,
-.rbc-slide {
+.rbc-card {
   contain: layout style;
   transform: translateZ(0);
   will-change: transform;
