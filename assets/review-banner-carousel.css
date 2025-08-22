@@ -33,6 +33,7 @@
   }
 }
 
+
 /* Container */
 .rbc-container {
   max-width: var(--page-width);
@@ -151,7 +152,8 @@
 /* Premium Card Design */
 .rbc-slide {
   flex: 0 0 auto;
-  width: var(--rbc-slide-w-mobile, 34rem);
+  width: var(--rbc-card-width, 340px);
+  height: var(--rbc-card-height, 480px);
   background: rgb(var(--color-background));
   border-radius: var(--rbc-border-radius);
   overflow: hidden;
@@ -161,23 +163,8 @@
   border: 1px solid rgba(var(--color-foreground), 0.1);
   display: flex;
   flex-direction: column;
-  min-height: 48rem;
   cursor: pointer;
   transform: translateZ(0);
-}
-
-@media screen and (min-width: 750px) {
-  .rbc-slide {
-    width: var(--rbc-slide-w-tablet, 40rem);
-    min-height: 52rem;
-  }
-}
-
-@media screen and (min-width: 990px) {
-  .rbc-slide {
-    width: var(--rbc-slide-w-desktop, 44rem);
-    min-height: 56rem;
-  }
 }
 
 .rbc-slide:hover {
@@ -201,54 +188,46 @@
 }
 
 /* Enhanced Image Section */
-.rbc-image-wrapper,
-.rbc-image-placeholder {
+.rbc-image-wrapper {
   position: relative;
   width: 100%;
   overflow: hidden;
-  background: linear-gradient(135deg, 
-    rgb(var(--color-background)), 
+  background: linear-gradient(135deg,
+    rgb(var(--color-background)),
     rgba(var(--color-background), 0.8)
   );
   flex-shrink: 0;
 }
 
 /* Aspect Ratio System */
-.rbc-image-wrapper[data-aspect="auto"],
-.rbc-image-placeholder[data-aspect="auto"] {
+.rbc-image-wrapper[data-aspect="auto"] {
   height: 26rem;
 }
 
-.rbc-image-wrapper[data-aspect="square"],
-.rbc-image-placeholder[data-aspect="square"] {
+.rbc-image-wrapper[data-aspect="square"] {
   aspect-ratio: 1 / 1;
 }
 
-.rbc-image-wrapper[data-aspect="landscape"],
-.rbc-image-placeholder[data-aspect="landscape"] {
+.rbc-image-wrapper[data-aspect="landscape"] {
   aspect-ratio: 4 / 3;
 }
 
-.rbc-image-wrapper[data-aspect="widescreen"],
-.rbc-image-placeholder[data-aspect="widescreen"] {
+.rbc-image-wrapper[data-aspect="widescreen"] {
   aspect-ratio: 16 / 9;
 }
 
-.rbc-image-wrapper[data-aspect="portrait"],
-.rbc-image-placeholder[data-aspect="portrait"] {
+.rbc-image-wrapper[data-aspect="portrait"] {
   aspect-ratio: 3 / 4;
 }
 
 @media screen and (min-width: 750px) {
-  .rbc-image-wrapper[data-aspect="auto"],
-  .rbc-image-placeholder[data-aspect="auto"] {
+  .rbc-image-wrapper[data-aspect="auto"] {
     height: 28rem;
   }
 }
 
 @media screen and (min-width: 990px) {
-  .rbc-image-wrapper[data-aspect="auto"],
-  .rbc-image-placeholder[data-aspect="auto"] {
+  .rbc-image-wrapper[data-aspect="auto"] {
     height: 30rem;
   }
 }
@@ -881,3 +860,4 @@
     display: none;
   }
 }
+

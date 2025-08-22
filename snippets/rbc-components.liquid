@@ -19,6 +19,7 @@
   assign rating_color = color | default: 'gold'
   assign show_text = show_text | default: false
   assign is_interactive = interactive | default: false
+  assign uid = uid | default: section.id
 -%}
 
 {%- case component_type -%}
@@ -61,16 +62,16 @@
       {%- endfor -%}
       
       {%- if has_half_star == 1 -%}
-        <span class="rbc-star rbc-star--half" 
+        <span class="rbc-star rbc-star--half"
               {% if is_interactive %}role="button" tabindex="0" data-rating="{{ full_stars | plus: 1 }}"{% endif %}>
           <svg viewBox="0 0 24 24" role="img" aria-hidden="true">
             <defs>
-              <linearGradient id="half-{{ section.id }}-{{ forloop.index }}">
+              <linearGradient id="half-{{ uid }}">
                 <stop offset="50%" stop-color="currentColor"/>
                 <stop offset="50%" stop-color="rgba(0,0,0,0.2)"/>
               </linearGradient>
             </defs>
-            <path fill="url(#half-{{ section.id }}-{{ forloop.index }})" 
+            <path fill="url(#half-{{ uid }})"
                   d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
           </svg>
         </span>
@@ -183,15 +184,17 @@
 
     {%- if img != blank -%}
       <div class="rbc-image-container" data-aspect="{{ img_aspect_ratio }}">
-        {%- if blur_up -%}
-          <img 
-            class="rbc-image-blur" 
-            src="{{ blur_url }}"
-            alt=""
-            aria-hidden="true"
-            loading="eager"
-          >
-        {%- endif -%}
+      {%- if blur_up -%}
+        <img
+          class="rbc-image-blur"
+          src="{{ blur_url }}"
+          alt=""
+          aria-hidden="true"
+          loading="eager"
+          width="{{ img.width }}"
+          height="{{ img.height }}"
+        >
+      {%- endif -%}
         
         <img 
           class="{{ img_class }}"
@@ -241,17 +244,19 @@
         {% when 'youtube' %}
           <div class="rbc-video-embed" data-youtube-id="{{ youtube_id }}">
             {%- if poster != blank -%}
-              {{ poster | image_url: width: 800 | image_tag: 
+              {{ poster | image_url: width: 800 | image_tag:
                   class: 'rbc-video-poster',
                   loading: 'lazy',
                   alt: 'Video review thumbnail'
               }}
             {%- else -%}
-              <img 
-                class="rbc-video-poster" 
+              <img
+                class="rbc-video-poster"
                 src="https://img.youtube.com/vi/{{ youtube_id }}/maxresdefault.jpg"
                 alt="Video review thumbnail"
                 loading="lazy"
+                width="1280"
+                height="720"
               >
             {%- endif -%}
             

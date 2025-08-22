@@ -6,6 +6,8 @@
   Features: Mixed data source, video reviews, advanced animations, accessibility, SEO
 {% endcomment %}
 
+{{ 'review-banner-carousel.css' | asset_url | stylesheet_tag }}
+
 {%- liquid
   # Performance and error handling
   assign section_id = 'rbc-' | append: section.id
@@ -30,11 +32,10 @@
   assign show_pagination = section.settings.show_pagination
   assign enable_video_reviews = section.settings.enable_video_reviews
   assign max_reviews_display = section.settings.max_reviews | default: 50
-  
-  # Responsive settings
-  assign slides_mobile = section.settings.slides_mobile | default: 1.2
-  assign slides_tablet = section.settings.slides_tablet | default: 2.5
-  assign slides_desktop = section.settings.slides_desktop | default: 3.5
+
+  # Card dimensions
+  assign card_width = section.settings.card_width | default: 340
+  assign card_height = section.settings.card_height | default: 480
   
   # Advanced features
   assign enable_schema = section.settings.enable_schema_markup
@@ -71,11 +72,10 @@
   #{{ section_id }} {
     /* Dynamic CSS Custom Properties */
     --rbc-scroll-speed: {{ scroll_speed }}s;
-    --rbc-slides-mobile: {{ slides_mobile }};
-    --rbc-slides-tablet: {{ slides_tablet }};
-    --rbc-slides-desktop: {{ slides_desktop }};
-    --rbc-slide-gap-mobile: {{ section.settings.slide_gap_mobile | default: 16 }}px;
-    --rbc-slide-gap-desktop: {{ section.settings.slide_gap_desktop | default: 24 }}px;
+    --rbc-gap-mobile: {{ section.settings.slide_gap_mobile | default: 16 }}px;
+    --rbc-gap: {{ section.settings.slide_gap_desktop | default: 24 }}px;
+    --rbc-card-width: {{ card_width }}px;
+    --rbc-card-height: {{ card_height }}px;
     
     /* Color scheme integration */
     --rbc-bg-primary: rgb(var(--color-{{ color_scheme }}-background));
@@ -134,24 +134,6 @@
     {% endcase %}
   }
   
-  /* Section-specific responsive adjustments */
-  @media screen and (max-width: 749px) {
-    #{{ section_id }} .rbc-slide {
-      width: calc((100vw - var(--page-width-margin) * 2 - var(--rbc-slide-gap-mobile) * (var(--rbc-slides-mobile) - 1)) / var(--rbc-slides-mobile));
-    }
-  }
-  
-  @media screen and (min-width: 750px) and (max-width: 989px) {
-    #{{ section_id }} .rbc-slide {
-      width: calc((100vw - var(--page-width-margin) * 2 - var(--rbc-slide-gap-desktop) * (var(--rbc-slides-tablet) - 1)) / var(--rbc-slides-tablet));
-    }
-  }
-  
-  @media screen and (min-width: 990px) {
-    #{{ section_id }} .rbc-slide {
-      width: calc((var(--page-width) - var(--rbc-slide-gap-desktop) * (var(--rbc-slides-desktop) - 1)) / var(--rbc-slides-desktop));
-    }
-  }
 {%- endstyle -%}
 
 {%- if enable_schema and total_reviews > 0 -%}
@@ -229,7 +211,7 @@
         {%- if section.settings.show_aggregate_rating and total_reviews > 0 -%}
           <div class="rbc-aggregate-rating">
             <div class="rbc-aggregate-stars">
-              {%- render 'rbc-components', type: 'star-rating', rating: average_rating, size: 'large' -%}
+              {%- render 'rbc-components', type: 'star-rating', rating: average_rating, size: 'large', uid: section_id | append: '-avg' -%}
             </div>
             
             <div class="rbc-aggregate-text">
@@ -317,9 +299,9 @@
         data-scroll-speed="{{ scroll_speed }}"
         data-direction="{{ scroll_direction }}"
         data-pause-on-hover="{{ pause_on_hover }}"
-        data-lazy-load="{{ lazy_load_strategy }}"
-        data-enable-drag="true"
-        data-enable-keyboard="true"
+        data-image-strategy="{{ lazy_load_strategy }}"
+        data-drag-enabled="true"
+        data-keyboard-enabled="true"
         data-animation-style="{{ animation_style }}"
         {% if enable_analytics %}data-analytics="true"{% endif %}
         role="region"
@@ -373,58 +355,56 @@
                 {{ block.shopify_attributes }}
               >
                 
-                {%- if product_image != blank or has_video -%}
-                  <div class="rbc-image-wrapper" data-aspect="{{ image_aspect_ratio }}">
-                    {%- if has_video -%}
-                      <!-- Video Review -->
-                      <div class="rbc-video-container">
-                        {%- render 'rbc-components', 
-                          type: 'video-player', 
-                          video_url: video_url, 
-                          poster: product_image,
-                          review_id: review_id 
-                        -%}
-                        <div class="rbc-video-overlay">
-                          <button class="rbc-video-play-btn" aria-label="Play review video">
-                            <svg viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M8 5v14l11-7z"/>
-                            </svg>
-                          </button>
-                        </div>
-                      </div>
-                    {%- elsif product_image != blank -%}
-                      <!-- Product Image -->
-                      {%- liquid
-                        assign image_loading = 'lazy'
-                        if forloop.index <= 3
-                          assign image_loading = 'eager'
-                        endif
-                      -%}
-                      
+                <div class="rbc-image-wrapper" data-aspect="{{ image_aspect_ratio }}">
+                  {%- if has_video -%}
+                    <!-- Video Review -->
+                    <div class="rbc-video-container">
                       {%- render 'rbc-components',
-                        type: 'responsive-image',
-                        image: product_image,
-                        alt: product_title | default: customer_name | append: ' review',
-                        loading: image_loading,
-                        sizes: '(max-width: 749px) 90vw, (max-width: 989px) 45vw, 33vw',
-                        class: 'rbc-image',
-                        aspect_ratio: image_aspect_ratio
+                        type: 'video-player',
+                        video_url: video_url,
+                        poster: product_image,
+                        review_id: review_id
                       -%}
-                      
-                      {%- if product_title != blank -%}
-                        <div class="rbc-product-badge">
-                          {{ product_title }}
-                        </div>
-                      {%- endif -%}
+                      <div class="rbc-video-overlay">
+                        <button class="rbc-video-play-btn" aria-label="Play review video">
+                          <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  {%- elsif product_image != blank -%}
+                    <!-- Product Image -->
+                    {%- liquid
+                      assign image_loading = 'lazy'
+                      if forloop.index <= 3
+                        assign image_loading = 'eager'
+                      endif
+                    -%}
+
+                    {%- render 'rbc-components',
+                      type: 'responsive-image',
+                      image: product_image,
+                      alt: product_title | default: customer_name | append: ' review',
+                      loading: image_loading,
+                      sizes: '(max-width: 749px) 90vw, (max-width: 989px) 45vw, 33vw',
+                      class: 'rbc-image',
+                      aspect_ratio: image_aspect_ratio
+                    -%}
+
+                    {%- if product_title != blank -%}
+                      <div class="rbc-product-badge">
+                        {{ product_title }}
+                      </div>
                     {%- endif -%}
-                  </div>
-                {%- endif -%}
+                  {%- endif -%}
+                </div>
 
                 <div class="rbc-content">
                   
                   <!-- Rating Stars -->
                   <div class="rbc-rating" role="img" aria-label="{{ rating }} out of 5 stars">
-                    {%- render 'rbc-components', type: 'star-rating', rating: rating, size: 'medium' -%}
+                    {%- render 'rbc-components', type: 'star-rating', rating: rating, size: 'medium', uid: review_id -%}
                   </div>
 
                   <!-- Customer Information -->
@@ -551,6 +531,8 @@
   </div>
 </section>
 
+{{ 'review-banner-carousel.js' | asset_url | script_tag }}
+
 {%- unless request.design_mode -%}
   {%- comment -%} Initialize carousel in production {%- endcomment -%}
   <script>
@@ -657,34 +639,27 @@
     },
     {
       "type": "header",
-      "content": "📱 Responsive Settings"
+      "content": "📐 Card dimensions"
     },
     {
       "type": "range",
-      "id": "slides_mobile",
-      "label": "Slides visible on mobile",
-      "min": 1,
-      "max": 3,
-      "step": 0.1,
-      "default": 1.2
+      "id": "card_width",
+      "label": "Card width",
+      "unit": "px",
+      "min": 240,
+      "max": 600,
+      "step": 10,
+      "default": 340
     },
     {
       "type": "range",
-      "id": "slides_tablet",
-      "label": "Slides visible on tablet",
-      "min": 1,
-      "max": 4,
-      "step": 0.1,
-      "default": 2.5
-    },
-    {
-      "type": "range",
-      "id": "slides_desktop",
-      "label": "Slides visible on desktop",
-      "min": 1,
-      "max": 6,
-      "step": 0.1,
-      "default": 3.5
+      "id": "card_height",
+      "label": "Card height",
+      "unit": "px",
+      "min": 320,
+      "max": 800,
+      "step": 10,
+      "default": 480
     },
     {
       "type": "range",
