@@ -156,25 +156,18 @@
 
 /* Premium Card Design */
 .rbc-slide {
-  flex: 0 0 calc((100% - (var(--rbc-slides-mobile) - 1) * var(--rbc-gap-mobile)) / var(--rbc-slides-mobile));
-}
-@media screen and (min-width: 750px) {
-  .rbc-slide {
-    flex: 0 0 calc((100% - (var(--rbc-slides-tablet) - 1) * var(--rbc-gap)) / var(--rbc-slides-tablet));
-  }
-}
-
-@media screen and (min-width: 990px) {
-  .rbc-slide {
-    flex: 0 0 calc((100% - (var(--rbc-slides-desktop) - 1) * var(--rbc-gap)) / var(--rbc-slides-desktop));
-  }
+  display: flex;
+  flex: 0 0 var(--rbc-card-width);
+  max-width: var(--rbc-card-width);
+  justify-content: center;
 }
 
 
 
 .rbc-card {
-  width: 100%;
-  height: auto;
+  width: var(--rbc-card-width);
+  max-width: 100%;
+  height: var(--rbc-card-height);
   background: rgb(var(--color-background));
   border-radius: var(--rbc-border-radius);
   overflow: hidden;
