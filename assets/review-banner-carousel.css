@@ -400,6 +400,33 @@
 }
 
 /* Enhanced Review Text */
+.rbc-quote {
+  position: relative;
+  overflow: hidden;
+  padding-inline: 0.8rem;
+}
+
+.rbc-quote::before,
+.rbc-quote::after {
+  content: '"';
+  position: absolute;
+  inset: auto;
+  font-size: 2rem;
+  color: rgba(var(--color-base-accent-1), 0.4);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.rbc-quote::before {
+  top: 0;
+  left: 0.8rem;
+}
+
+.rbc-quote::after {
+  bottom: 0;
+  right: 0.8rem;
+}
+
 .rbc-review-text {
   margin: 0;
   font-size: calc(var(--font-body-scale) * 1.1rem);
@@ -407,27 +434,7 @@
   color: rgba(var(--color-foreground), 0.85);
   font-weight: 400;
   flex: 1;
-  position: relative;
   font-style: italic;
-}
-
-.rbc-review-text::before,
-.rbc-review-text::after {
-  content: '"';
-  font-size: 2rem;
-  color: rgba(var(--color-base-accent-1), 0.4);
-  font-weight: 700;
-  line-height: 1;
-}
-
-.rbc-review-text::before {
-  float: left;
-  margin: -0.5rem 0.5rem 0 0;
-}
-
-.rbc-review-text::after {
-  float: right;
-  margin: -0.5rem 0 0 0.5rem;
 }
 
 /* Review Metadata */
